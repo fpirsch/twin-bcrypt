@@ -1,0 +1,36 @@
+{
+    "name": "twin-bcrypt",
+    "description": "Pure JavaScript BCrypt implement for NodeJS and the browser.",
+    "main": "./twin-bcrypt",
+    "author": "François Pirsch (https://github.com/fpirsch)",
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/fpirsch/twin-bcrypt.git"
+    },
+    "directories": {
+        "test": "test"
+    },
+    "scripts": {
+        "test": "npm test"
+    },
+    "bugs": {
+        "url": "https://github.com/fpirsch/twin-bcrypt/issues"
+    },
+    "keywords": [
+        "bcrypt",
+        "javascript",
+        "js",
+        "hash",
+        "password",
+        "auth",
+        "authentication",
+        "encryption",
+        "crypt",
+        "crypto"
+    ],
+    "devDependencies": {
+        "mocha": "~1.8.2",
+        "should": "~1.2.2"
+    }
+}
