@@ -4,6 +4,11 @@ twin-bcrypt
 Pure JS implementation of the [https://en.wikipedia.org/wiki/Bcrypt](BCrypt) algorithm for Node and the browser without dependencies.
 See the htpasswpd generator at http://aspirine.org/htpasswd_en.html for a live demo.
 
+## TODO:
+This is work in progress...
+The first thing to do is to set up a decent set of tests.
+
+
 ## Basic usage:
 Synchronous
 ```
