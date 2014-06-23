@@ -1,7 +1,7 @@
 twin-bcrypt
 ===========
 
-Pure JS implementation of the [https://en.wikipedia.org/wiki/Bcrypt](BCrypt) algorithm for Node and the browser without dependencies.
+Pure JS implementation of the [BCrypt](https://en.wikipedia.org/wiki/Bcrypt) algorithm for Node and the browser without dependencies.
 See the htpasswpd generator at http://aspirine.org/htpasswd_en.html for a live demo.
 
 ## TODO:
@@ -68,7 +68,7 @@ Though you can use your custom salt and there is no need for salts to be persist
 
 
 ## Credits
-This project is a fork of [bcrypt-nodejs], which is based on [https://code.google.com/p/javascript-bcrypt/](javascript-bcrypt), which is itself a
-javascript port of damien miller's [https://code.google.com/p/jbcrypt/](jbcrypt).
+This project is a fork of [bcrypt-nodejs](https://github.com/shaneGirish/bcrypt-nodejs), which is based on [javascript-bcrypt](https://code.google.com/p/javascript-bcrypt/), which is itself a
+javascript port of damien miller's [jBCrypt](https://code.google.com/p/jbcrypt/).
 
-[node.bcrypt.js]:https://github.com/ncb000gt/node.bcrypt.js.git
+[node.bcrypt.js](https://github.com/ncb000gt/node.bcrypt.js.git)
