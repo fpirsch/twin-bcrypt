@@ -1,7 +1,7 @@
-var inspect = require('eyespect').inspector()
-var should = require('should')
-var assert = require('assert')
-var bCrypt = require("../bCrypt")
+var should = require('chai').should();
+
+var assert = require('assert');
+var bCrypt = require("../bCrypt");
 describe('Test Sync', function () {
   this.timeout('100s')
   this.slow('50s')
@@ -12,7 +12,7 @@ describe('Test Sync', function () {
 
   var pw1, pw2, pw3, pw4, hash_pw1, hash_pw2, hash_pw3, hash_pw4
   before(function () {
-    inspect('generating hashes, this will take a while')
+    console.log('generating hashes, this will take a while')
     salt1 = bCrypt.genSaltSync(8)
     should.exist(salt1, 'genSaltSync failed')
     salt2 = bCrypt.genSaltSync(10)
