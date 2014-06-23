@@ -2,7 +2,7 @@
 /* global describe, before, it */
 
 var should = require('chai').should(),
-    bCrypt = require("../bCrypt");
+    bCrypt = require("../twin-bcrypt");
 
 describe('Test Sync', function() {
     this.timeout('100s');
