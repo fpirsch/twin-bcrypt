@@ -5,99 +5,87 @@ var should = require('chai').should(),
     bCrypt = require("../twin-bcrypt");
 
 describe('Test Sync', function() {
-    this.timeout('100s');
-    this.slow('50s');
+    console.log('This suite takes a few seconds to run.');
 
-    var salt1, salt2,
-        secret = "super secret",
-        hash1, hash2, hash3, hash4, hash5, hash6, hash7, hash8, hash9, hash0, invalidHash,
-        pw1, pw2, pw3, pw4, hash_pw1, hash_pw2, hash_pw3, hash_pw4;
+    // Passes in 14s on my computer
+    var jbcrypt_test_suite = [
+        { pw: "", hash: "$2a$06$DCq7YPn5Rq63x1Lad4cll.TV4S6ytwfsfvkgY8jIucDrjc8deX1s." },
+        { pw: "", hash: "$2a$08$HqWuK6/Ng6sg9gQzbLrgb.Tl.ZHfXLhvt/SgVyWhQqgqcZ7ZuUtye" },
+        { pw: "", hash: "$2a$10$k1wbIrmNyFAPwPVPSVa/zecw2BCEnBwVS2GbrmgzxFUOqW9dk4TCW" },
+        { pw: "", hash: "$2a$12$k42ZFHFWqBp3vWli.nIn8uYyIkbvYRvodzbfbK18SSsY.CsIQPlxO" },
+        { pw: "a", hash: "$2a$06$m0CrhHm10qJ3lXRY.5zDGO3rS2KdeeWLuGmsfGlMfOxih58VYVfxe" },
+        { pw: "a", hash: "$2a$08$cfcvVd2aQ8CMvoMpP2EBfeodLEkkFJ9umNEfPD18.hUF62qqlC/V." },
+        { pw: "a", hash: "$2a$10$k87L/MF28Q673VKh8/cPi.SUl7MU/rWuSiIDDFayrKk/1tBsSQu4u" },
+        { pw: "a", hash: "$2a$12$8NJH3LsPrANStV6XtBakCez0cKHXVxmvxIlcz785vxAIZrihHZpeS" },
+        { pw: "abc", hash: "$2a$06$If6bvum7DFjUnE9p2uDeDu0YHzrHM6tf.iqN8.yx.jNN1ILEf7h0i" },
+        { pw: "abc", hash: "$2a$08$Ro0CUfOqk6cXEKf3dyaM7OhSCvnwM9s4wIX9JeLapehKK5YdLxKcm" },
+        { pw: "abc", hash: "$2a$10$WvvTPHKwdBJ3uk0Z37EMR.hLA2W6N9AEBhEgrAOljy2Ae5MtaSIUi" },
+        { pw: "abc", hash: "$2a$12$EXRkfkdmXn2gzds2SSitu.MW9.gAVqa9eLS1//RYtYCmB1eLHg.9q" },
+        { pw: "abcdefghijklmnopqrstuvwxyz", hash: "$2a$06$.rCVZVOThsIa97pEDOxvGuRRgzG64bvtJ0938xuqzv18d3ZpQhstC" },
+        { pw: "abcdefghijklmnopqrstuvwxyz", hash: "$2a$08$aTsUwsyowQuzRrDqFflhgekJ8d9/7Z3GV3UcgvzQW3J5zMyrTvlz." },
+        { pw: "abcdefghijklmnopqrstuvwxyz", hash: "$2a$10$fVH8e28OQRj9tqiDXs1e1uxpsjN0c7II7YPKXua2NAKYvM6iQk7dq" },
+        { pw: "abcdefghijklmnopqrstuvwxyz", hash: "$2a$12$D4G5f18o7aMMfwasBL7GpuQWuP3pkrZrOAnqP.bmezbMng.QwJ/pG" },
+        { pw: "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", hash: "$2a$06$fPIsBO8qRqkjj273rfaOI.HtSV9jLDpTbZn782DC6/t7qT67P6FfO" },
+        { pw: "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", hash: "$2a$08$Eq2r4G/76Wv39MzSX262huzPz612MZiYHVUJe/OcOql2jo4.9UxTW" },
+        { pw: "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", hash: "$2a$10$LgfYWkbzEvQ4JakH7rOvHe0y8pHKF9OaFgwUZ2q7W2FFZmZzJYlfS" },
+        { pw: "~!@#$%^&*()      ~!@#$%^&*()PNBFRD", hash: "$2a$12$WApznUOJfkEGSmYRfnkrPOr466oFDCaj4b6HY3EXGvfxm43seyhgC" },
+    ];
 
-    before(function() {
-        console.log('generating hashes, this will take a while');
-        salt1 = bCrypt.genSaltSync(8);
-        should.exist(salt1, 'genSaltSync failed');
-        salt2 = bCrypt.genSaltSync(10);
-        should.exist(salt2, 'genSaltSync failed');
-
-        hash1 = bCrypt.hashSync('super secret', salt1, null);
-        hash2 = bCrypt.hashSync('super secret', salt1, null);
-        hash3 = bCrypt.hashSync('supersecret', salt1, null);
-        hash4 = bCrypt.hashSync('supersecret', salt1, null);
-        hash5 = bCrypt.hashSync('super secret', salt2, null);
-        hash6 = bCrypt.hashSync('super secret', salt2, null);
-        hash7 = bCrypt.hashSync('supersecret', salt2, null);
-        hash8 = bCrypt.hashSync('supersecret', salt2, null);
-        hash9 = bCrypt.hashSync('super secret', null, null);
-        hash0 = bCrypt.hashSync('super secret', null, null);
-
-        invalidHash = 'some invalid hash that does not equal sixty bytes in length';
-
-        pw1 = '\u6e2f';  // http://www.fileformat.info/info/unicode/char/6e2f/index.htm
-        pw2 = '港'; // Character 0x6e2f same as pw1.
-        pw3 = '\u6f2f';  // http://www.fileformat.info/info/unicode/char/6f2f/index.htm
-        pw4 = '漯'; // Character 0x6f2f same as pw3.
-
-        var salt = '$2a$05$0000000000000000000000';
-        hash_pw1 = bCrypt.hashSync(pw1, salt, null);
-        hash_pw2 = bCrypt.hashSync(pw2, salt, null);
-        hash_pw3 = bCrypt.hashSync(pw3, salt, null);
-        hash_pw4 = bCrypt.hashSync(pw4, salt, null);
-    });
-
-    it('should match first set of compares', function() {
-        bCrypt.compareSync('super secret', hash1).should.be.true;
-        bCrypt.compareSync('super secret', hash2).should.be.true;
-        bCrypt.compareSync('super secret', hash3).should.be.false;
-        bCrypt.compareSync('super secret', hash4).should.be.false;
-        bCrypt.compareSync('super secret', hash5).should.be.true;
-        bCrypt.compareSync('super secret', hash6).should.be.true;
-        bCrypt.compareSync('super secret', hash7).should.be.false;
-        bCrypt.compareSync('super secret', hash8).should.be.false;
-        bCrypt.compareSync('super secret', hash9).should.be.true;
-        bCrypt.compareSync('super secret', hash0).should.be.true;
-    });
-
-    it('should match second set of compares', function() {
-        bCrypt.compareSync('supersecret', hash1).should.be.false;
-        bCrypt.compareSync('supersecret', hash2).should.be.false;
-        bCrypt.compareSync('supersecret', hash3).should.be.true;
-        bCrypt.compareSync('supersecret', hash4).should.be.true;
-        bCrypt.compareSync('supersecret', hash5).should.be.false;
-        bCrypt.compareSync('supersecret', hash6).should.be.false;
-        bCrypt.compareSync('supersecret', hash7).should.be.true;
-        bCrypt.compareSync('supersecret', hash8).should.be.true;
-        bCrypt.compareSync('supersecret', hash9).should.be.false;
-        bCrypt.compareSync('supersecret', hash0).should.be.false;
-    });
-
-    it('hash_pw1 should compare correctly to pw1', function() {
-        bCrypt.compareSync(pw1, hash_pw1).should.be.true;
-    });
-    it('hash_pw2 should compare correctly to pw2', function() {
-        bCrypt.compareSync(pw2, hash_pw2).should.be.true;
-    });
-    it('hash_pw3 should compare correctly to pw3', function() {
-        bCrypt.compareSync(pw3, hash_pw3).should.be.true;
-    });
-    it('hash_pw4 should compare correctly to pw4', function() {
-        bCrypt.compareSync(pw4, hash_pw4).should.be.true;
-    });
+    String.prototype.repeat = function(n) { return Array(n+1).join(this); };
+    
+    // Fails miserably for now.
+    var crypt_blowfish_test_suite = [
+        { hash: "$2a$05$CCCCCCCCCCCCCCCCCCCCC.E5YPO9kmyuRGyh0XouQYb4YMJKvyOeW", key: "U*U" },
+        { hash: "$2a$05$CCCCCCCCCCCCCCCCCCCCC.VGOzA784oUp/Z0DY336zx7pLYAy0lwK", key: "U*U*" },
+        { hash: "$2a$05$XXXXXXXXXXXXXXXXXXXXXOAcXxm9kjPGEMsLznoKqmqw7tc8WCx4a", key: "U*U*U" },
+        { hash: "$2a$05$abcdefghijklmnopqrstuu5s2v8.iXieOjg/.AySBTTZIIVFJeBui", key: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789chars after 72 are ignored" },
+        { hash: "$2x$05$/OK.fbVrR/bpIqNJ5ianF.CE5elHaaO4EbggVDjb8P19RukzXSM3e", key: "\xa3" },
+        { hash: "$2x$05$/OK.fbVrR/bpIqNJ5ianF.CE5elHaaO4EbggVDjb8P19RukzXSM3e", key: "\xff\xff\xa3" },
+        { hash: "$2y$05$/OK.fbVrR/bpIqNJ5ianF.CE5elHaaO4EbggVDjb8P19RukzXSM3e", key: "\xff\xff\xa3" },
+        { hash: "$2a$05$/OK.fbVrR/bpIqNJ5ianF.nqd1wy.pTMdcvrRWxyiGL2eMz.2a85.", key: "\xff\xff\xa3" },
+        { hash: "$2y$05$/OK.fbVrR/bpIqNJ5ianF.Sa7shbm4.OzKpvFnX1pQLmQW96oUlCq", key: "\xa3" },
+        { hash: "$2a$05$/OK.fbVrR/bpIqNJ5ianF.Sa7shbm4.OzKpvFnX1pQLmQW96oUlCq", key: "\xa3" },
+        { hash: "$2x$05$/OK.fbVrR/bpIqNJ5ianF.o./n25XVfn6oAPaUvHe.Csk4zRfsYPi", key: "1\xa3345" },
+        { hash: "$2x$05$/OK.fbVrR/bpIqNJ5ianF.o./n25XVfn6oAPaUvHe.Csk4zRfsYPi", key: "\xff\xa3345" },
+        { hash: "$2x$05$/OK.fbVrR/bpIqNJ5ianF.o./n25XVfn6oAPaUvHe.Csk4zRfsYPi", key: "\xff\xa334\xff\xff\xff\xa3345" },
+        { hash: "$2y$05$/OK.fbVrR/bpIqNJ5ianF.o./n25XVfn6oAPaUvHe.Csk4zRfsYPi", key: "\xff\xa334\xff\xff\xff\xa3345" },
+        { hash: "$2a$05$/OK.fbVrR/bpIqNJ5ianF.ZC1JEJ8Z4gPfpe1JOr/oyPXTWl9EFd.", key: "\xff\xa334\xff\xff\xff\xa3345" },
+        { hash: "$2y$05$/OK.fbVrR/bpIqNJ5ianF.nRht2l/HRhr6zmCp9vYUvvsqynflf9e", key: "\xff\xa3345" },
+        { hash: "$2a$05$/OK.fbVrR/bpIqNJ5ianF.nRht2l/HRhr6zmCp9vYUvvsqynflf9e", key: "\xff\xa3345" },
+        { hash: "$2a$05$/OK.fbVrR/bpIqNJ5ianF.6IflQkJytoRVc1yuaNtHfiuq.FRlSIS", key: "\xa3ab" },
+        { hash: "$2x$05$/OK.fbVrR/bpIqNJ5ianF.6IflQkJytoRVc1yuaNtHfiuq.FRlSIS", key: "\xa3ab" },
+        { hash: "$2y$05$/OK.fbVrR/bpIqNJ5ianF.6IflQkJytoRVc1yuaNtHfiuq.FRlSIS", key: "\xa3ab" },
+        { hash: "$2x$05$6bNw2HLQYeqHYyBfLMsv/OiwqTymGIGzFsA4hOTWebfehXHNprcAS", key: "\xd1\x91" },
+        { hash: "$2x$05$6bNw2HLQYeqHYyBfLMsv/O9LIGgn8OMzuDoHfof8AQimSGfcSWxnS", key: "\xd0\xc1\xd2\xcf\xcc\xd8" },
+        { hash: "$2a$05$/OK.fbVrR/bpIqNJ5ianF.swQOIzjOiJ9GHEPuhEkvqrUyvWhEMx6", key: "\xaa".repeat(72) + "chars after 72 are ignored as usual" },
+        { hash: "$2a$05$/OK.fbVrR/bpIqNJ5ianF.R9xrDjiycxMbQE2bp.vgqlYpW5wx2yy", key: "\xaa\x55".repeat(36) },
+        { hash: "$2a$05$/OK.fbVrR/bpIqNJ5ianF.9tQZzcJfm3uj2NvJ/n5xkhpqLrMpWCe", key: "\x55\xaa\xff".repeat(24) },
+        { hash: "$2a$05$CCCCCCCCCCCCCCCCCCCCC.7uG0VCzI2bS7j6ymqJi9CdcdxiRTWNy", key: "" }
+    ];
+    
+    var crypt_blowfish_fail_suite = [  // Que des trucs qui doivent échouer : bad number of rounds ou bad algo revision
+        // J'imagine que les tests bizarres de crypt_blowfish vérifient en fait l'état des buffers après l'appel. N'a pas lieu d'être en JS.
+        { setting: "$2a$03$CCCCCCCCCCCCCCCCCCCCC." },
+        { setting: "$2a$32$CCCCCCCCCCCCCCCCCCCCC." },
+        { setting: "$2z$05$CCCCCCCCCCCCCCCCCCCCC." },
+        { setting: "$2`$05$CCCCCCCCCCCCCCCCCCCCC." },
+        { setting: "$2{$05$CCCCCCCCCCCCCCCCCCCCC." }
+    ];
 
 
-    it('hash_pw1 should be different than hash_pw3', function() {
-        hash_pw1.should.not.equal(hash_pw3, 'hash_pw1 should be different from hash_pw3');
+    // TODO test parameters (bad number of rounds, invalid salt revision
+
+
+    it('should pass the jbcrypt test suite', function() {
+        jbcrypt_test_suite.forEach(function(test) {
+            bCrypt.compareSync(test.pw, test.hash).should.be.true;
+        });
     });
-    it('hash_pw2 should be different than hash_pw4', function() {
-        hash_pw2.should.not.equal(hash_pw4, 'hash_pw2 should be different from hash_pw4');
+
+    it('should pass the crypt_blowfish test suite', function() {
+        crypt_blowfish_test_suite.forEach(function(test) {
+            bCrypt.compareSync(test.key, test.hash).should.be.true;
+        });
     });
-    it('hash_pw1 should be equal hash_pw2', function() {
-        hash_pw1.should.equal(hash_pw2, 'hash_pw1 should equal hash_pw2');
-    });
-    it('hash_pw3 should be equal hash_pw4', function() {
-        hash_pw3.should.equal(hash_pw3, 'hash_pw3 should equal hash_pw4');
-    });
-    it('invalid hash should return false and not throw', function() {
-        bCrypt.compareSync('supersecret', invalidHash).should.be.false;
-    });
+
 });
