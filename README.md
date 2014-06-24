@@ -6,7 +6,9 @@ See the htpasswpd generator at http://aspirine.org/htpasswd_en.html for a live d
 
 ## TODO:
 This is work in progress...
-The first thing to do is to set up a decent set of tests.
+The first thing to do is to set up a decent set of tests. The jBCrypt test passes :-)
+
+The crypt_blowfish test suite fails, however. Non-ascii chars and $2x$ / $2y$ prefixes seem to be an issue.
 
 
 ## Basic usage:
