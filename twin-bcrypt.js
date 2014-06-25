@@ -261,12 +261,8 @@
             0xb74e6132, 0xce77e25b, 0x578fdfe3, 0x3ac372e6];
     var bf_crypt_ciphertext = [0x4f727068, 0x65616e42, 0x65686f6c, 0x64657253,
             0x63727944, 0x6f756274];
-    var base64_code = ['.', '/', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
-            'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
-            'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
-            'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-            'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8',
-            '9'];
+
+    var base64_code = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var index_64 = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1,
@@ -291,34 +287,34 @@
     }
 
     function encode_base64(d, len) {
-        var off = 0;
-        var rs = [];
-        var c1;
-        var c2;
+        var off = 0,
+            rs = '',
+            c1, c2;
         if (len <= 0 || len > d.length)
             throw "Invalid len";
         while (off < len) {
+            // we could use only uint8 and get rid of this & 0xff
             c1 = d[off++] & 0xff;
-            rs.push(base64_code[(c1 >> 2) & 0x3f]);
+            rs += base64_code[c1 >> 2];
             c1 = (c1 & 0x03) << 4;
             if (off >= len) {
-                rs.push(base64_code[c1 & 0x3f]);
+                rs += base64_code[c1];
                 break;
             }
             c2 = d[off++] & 0xff;
-            c1 |= (c2 >> 4) & 0x0f;
-            rs.push(base64_code[c1 & 0x3f]);
+            c1 |= c2 >> 4;
+            rs += base64_code[c1];
             c1 = (c2 & 0x0f) << 2;
             if (off >= len) {
-                rs.push(base64_code[c1 & 0x3f]);
+                rs += base64_code[c1];
                 break;
             }
             c2 = d[off++] & 0xff;
-            c1 |= (c2 >> 6) & 0x03;
-            rs.push(base64_code[c1 & 0x3f]);
-            rs.push(base64_code[c2 & 0x3f]);
+            c1 |= (c2 >> 6);
+            rs += base64_code[c1];
+            rs += base64_code[c2 & 0x3f];
         }
-        return rs.join('');
+        return rs;
     }
 
     function char64(x) {
@@ -578,8 +574,9 @@
             rs.push("0");
         rs.push(rounds.toString());
         rs.push("$");
-        rs.push(encode_base64(saltb, saltb.length));
-        rs.push(encode_base64(hashed, bf_crypt_ciphertext.length * 4 - 1));
+        rs.push(encode_base64(saltb, BCRYPT_SALT_LEN));
+        // This has to be bug-compatible with the original implementation, so only encode 23 of the 24 bytes.
+        rs.push(encode_base64(hashed, 23));
 
         return(rs.join(''));
     }
@@ -753,4 +750,6 @@
 	exports.cryptoRNG = cryptoRNG;
     exports.randomBytes = randomBytes;
 	exports.version = "0.0.1";
+    exports.encode_base64 = encode_base64;
+    exports.decode_base64 = decode_base64;
 }));
