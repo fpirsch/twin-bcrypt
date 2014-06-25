@@ -20,7 +20,7 @@ TwinBcrypt.compareSync("bacon", hash); // true
 TwinBcrypt.compareSync("veggies", hash); // false
 ```
 
-Asynchronous
+Asynchronous (not in browsers yet)
 ```
 TwinBcrypt.hash("bacon", null, null, function(err, hash) {
   // Store hash in your password DB.
