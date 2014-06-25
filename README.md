@@ -14,23 +14,23 @@ The crypt_blowfish test suite fails, however. Non-ascii chars and $2x$ / $2y$ pr
 ## Basic usage:
 Synchronous
 ```
-var hash = bcrypt.hashSync("bacon");
+var hash = TwinBcrypt.hashSync("bacon");
 
-bcrypt.compareSync("bacon", hash); // true
-bcrypt.compareSync("veggies", hash); // false
+TwinBcrypt.compareSync("bacon", hash); // true
+TwinBcrypt.compareSync("veggies", hash); // false
 ```
 
 Asynchronous
 ```
-bcrypt.hash("bacon", null, null, function(err, hash) {
+TwinBcrypt.hash("bacon", null, null, function(err, hash) {
   // Store hash in your password DB.
 });
 
 // Load hash from your password DB.
-bcrypt.compare("bacon", hash, function(err, res) {
+TwinBcrypt.compare("bacon", hash, function(err, res) {
     // res == true
 });
-bcrypt.compare("veggies", hash, function(err, res) {
+TwinBcrypt.compare("veggies", hash, function(err, res) {
     // res = false
 });
 ```
