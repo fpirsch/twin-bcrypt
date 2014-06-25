@@ -1,4 +1,47 @@
-var crypto = require("crypto");
+//https://github.com/umdjs/umd/blob/master/commonjsStrictGlobal.js
+(function (root, factory) {
+    if (typeof exports === 'object') {
+        // CommonJS
+        factory(exports, require('crypto'));
+    } else {
+        // Browser globals
+        factory((root.bCrypt = {}), null);
+    }
+}(this, function (exports, crypto) {
+
+	// Default random number generator for vintage browsers (IE < 11)
+	var cryptoRNG = false;
+	var randomBytes = function(numBytes) {
+		var bytes = [];
+		for(var i = 0; i < numBytes; i++) {
+			bytes[bytes.length] = Math.floor(Math.random() * 256);
+		}
+		return bytes;
+	}
+
+	if(crypto) {
+		// Nodejs crypto random number generator
+		cryptoRNG = true;
+		randomBytes = crypto.randomBytes;
+	}
+	else if(typeof window === 'object') {
+		// Cryptographic-quality random number generator for newer browsers.
+		if(window.crypto && window.crypto.getRandomValues) {
+			cryptoRNG = true;
+			randomBytes = function(numBytes) {
+				var array = new Uint8Array(numBytes);
+				return window.crypto.getRandomValues(array);
+			}
+		}
+	}
+
+	// The browser way to do this. We don't do the Buffer thing.
+	function string2utf8Bytes(s) {
+		return unescape(encodeURIComponent(s)).split('').map(function(c){return c.charCodeAt(0);});
+	}
+
+    var newBuffer = (typeof Buffer === 'undefined') ? string2utf8Bytes : Buffer;
+
 
 var BCRYPT_SALT_LEN = 16;
 
@@ -518,7 +561,7 @@ function hashpw(password, salt, progress) {
 	real_salt = salt.substring(off + 3, off + 25);
 	password = password + (minor >= 'a' ? "\000" : "");
 
-	var buf = new Buffer(password);
+	var buf = newBuffer(password);
 	for (var r = 0; r < buf.length; r++) {
 		passwordb.push(buf[r]);
 	}
@@ -705,3 +748,8 @@ exports.hash = hash;
 exports.compareSync = compareSync;
 exports.compare = compare;
 exports.getRounds = getRounds;
+
+	exports.cryptoRNG = cryptoRNG;
+    exports.randomBytes = randomBytes;
+	exports.version = "0.0.1";
+}));
