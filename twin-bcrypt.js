@@ -1,3 +1,5 @@
+/* jshint node: true, browser: true, nonstandard: true, eqeqeq: true */
+
 (function (root, factory) {
     if (typeof exports === 'object') {
         // CommonJS
@@ -16,7 +18,7 @@
 			bytes[bytes.length] = Math.floor(Math.random() * 256);
 		}
 		return bytes;
-	}
+	};
 
 	if(crypto) {
 		// Nodejs crypto random number generator
@@ -30,7 +32,7 @@
 			randomBytes = function(numBytes) {
 				var array = new Uint8Array(numBytes);
 				return window.crypto.getRandomValues(array);
-			}
+			};
 		}
 	}
 
@@ -275,9 +277,9 @@
             49, 50, 51, 52, 53, -1, -1, -1, -1, -1];
 
     function getByte(c) {
-        var ret = 0;
+        var ret = 0,b ;
         try {
-            var b = c.charCodeAt(0);
+            b = c.charCodeAt(0);
         } catch (err) {
             b = c;
         }
@@ -286,7 +288,7 @@
         } else {
             return b;
         }
-    };
+    }
 
     function encode_base64(d, len) {
         var off = 0;
@@ -317,7 +319,7 @@
             rs.push(base64_code[c2 & 0x3f]);
         }
         return rs.join('');
-    };
+    }
 
     function char64(x) {
         var code = x.charCodeAt(0);
@@ -325,7 +327,7 @@
             return -1;
         }
         return index_64[code];
-    };
+    }
 
     function decode_base64(s, maxolen) {
         var off = 0;
@@ -337,7 +339,7 @@
         while (off < slen - 1 && olen < maxolen) {
             c1 = char64(s.charAt(off++));
             c2 = char64(s.charAt(off++));
-            if (c1 == -1 || c2 == -1) {
+            if (c1 === -1 || c2 === -1) {
                 break;
             }
             o = getByte(c1 << 2);
@@ -347,7 +349,7 @@
                 break;
             }
             c3 = char64(s.charAt(off++));
-            if (c3 == -1) {
+            if (c3 === -1) {
                 break;
             }
             o = getByte((c2 & 0x0f) << 4);
@@ -367,7 +369,7 @@
             ret.push(getByte(rs[off]));
         }
         return ret;
-    };
+    }
 
     function encipher(lr, off, P, S) {
         var i;
@@ -394,7 +396,7 @@
         lr[off] = r ^ P[BLOWFISH_NUM_ROUNDS + 1];
         lr[off + 1] = l;
         return lr;
-    };
+    }
 
     function streamtoword(data, offp) {
         var i;
@@ -404,9 +406,9 @@
             offp = (offp + 1) % data.length;
         }
         return {key:word, offp:offp};
-    };
+    }
 
-    function key(key, P, S) {
+    function expandKey(key, P, S) {
         var i;
         var offp = 0;
         var lr = new Array(0x00000000, 0x00000000);
@@ -429,7 +431,7 @@
             S[i] = lr[0];
             S[i + 1] = lr[1];
         }
-    };
+    }
 
     function ekskey(data, key, P, S) {
         var i;
@@ -471,7 +473,7 @@
             S[i] = lr[0];
             S[i + 1] = lr[1];
         }
-    };
+    }
 
     function crypt_raw(password, salt, log_rounds, progress) {
         var rounds;
@@ -482,7 +484,7 @@
 
         if (log_rounds < 4 || log_rounds > 31)
             throw "Bad number of rounds";
-        if (salt.length != BCRYPT_SALT_LEN)
+        if (salt.length !== BCRYPT_SALT_LEN)
             throw "Bad salt length";
 
         rounds = 1 << log_rounds;
@@ -495,37 +497,37 @@
 
         var i = 0;
 
-        while(true) {
-            if(i < rounds){
+        while (true) {
+            if (i < rounds) {
                 var start = new Date();
                 for (; i < rounds;) {
                     i = i + 1;
-                    key(password, P, S);
-                    key(salt, P, S);
-                            if(i % one_percent == 0){
-                            progress();
-                            }
-                            if((new Date() - start) > MAX_EXECUTION_TIME){
-                                    break;
-                            }
-                        }
-                } else {
-                    for (i = 0; i < 64; i++) {
-                            for (j = 0; j < (clen >> 1); j++) {
-                                    var lr = encipher(cdata, j << 1, P, S);
-                            }
-                        }
-                var ret = [];
-                    for (i = 0; i < clen; i++) {
-                            ret.push(getByte((cdata[i] >> 24) & 0xff));
-                            ret.push(getByte((cdata[i] >> 16) & 0xff));
-                            ret.push(getByte((cdata[i] >> 8) & 0xff));
-                            ret.push(getByte(cdata[i] & 0xff));
-                        }
-                        return(ret);
+                    expandKey(password, P, S);
+                    expandKey(salt, P, S);
+                    if (i % one_percent) {
+                        progress();
+                    }
+                    if (new Date() - start > MAX_EXECUTION_TIME) {
+                        break;
+                    }
                 }
+            } else {
+                for (i = 0; i < 64; i++) {
+                    for (j = 0; j < (clen >> 1); j++) {
+                        var lr = encipher(cdata, j << 1, P, S);
+                    }
+                }
+                var ret = [];
+                for (i = 0; i < clen; i++) {
+                    ret.push(getByte((cdata[i] >> 24) & 0xff));
+                    ret.push(getByte((cdata[i] >> 16) & 0xff));
+                    ret.push(getByte((cdata[i] >> 8) & 0xff));
+                    ret.push(getByte(cdata[i] & 0xff));
+                }
+                return ret;
+            }
         }
-    };
+    }
 
     function hashpw(password, salt, progress) {
         var real_salt;
@@ -540,13 +542,13 @@
                 progress = function() {};
         }
 
-        if (salt.charAt(0) != '$' || salt.charAt(1) != '2')
+        if (salt.charAt(0) !== '$' || salt.charAt(1) !== '2')
             throw "Invalid salt version";
-        if (salt.charAt(2) == '$')
+        if (salt.charAt(2) === '$')
             off = 3;
         else {
             minor = salt.charAt(2);
-            if (minor != 'a' || salt.charAt(3) != '$')
+            if (minor !== 'a' || salt.charAt(3) !== '$')
                 throw "Invalid salt revision";
             off = 4;
         }
@@ -580,7 +582,7 @@
         rs.push(encode_base64(hashed, bf_crypt_ciphertext.length * 4 - 1));
 
         return(rs.join(''));
-    };
+    }
 
     function gensalt(rounds) {
         var iteration_count = rounds;
@@ -603,7 +605,7 @@
 
         output.push(encode_base64(rand_buf, BCRYPT_SALT_LEN));
         return output.join('');
-    };
+    }
 
     function genSaltSync(rounds) {
         /*
@@ -625,13 +627,13 @@
                 salt - Second parameter to the callback providing the generated salt.
         */
         if(!callback) {
-            throw "No callback function was given."
+            throw "No callback function was given.";
         }
         process.nextTick(function() {
             var result = null;
             var error = null;
             try {
-                result = genSaltSync(rounds)
+                result = genSaltSync(rounds);
             } catch(err) {
                 error = err;
             }
@@ -660,13 +662,13 @@
                 encrypted - Second parameter to the callback providing the encrypted form.
         */
         if(!callback) {
-            throw "No callback function was given."
+            throw "No callback function was given.";
         }
         process.nextTick(function() {
             var result = null;
             var error = null;
             try {
-                result = hashSync(data, salt, progress)
+                result = hashSync(data, salt, progress);
             } catch(err) {
                 error = err;
             }
@@ -680,13 +682,13 @@
             encrypted - [REQUIRED] - data to be compared to.
         */
 
-        if(typeof data != "string" ||  typeof encrypted != "string") {
+        if(typeof data !== "string" ||  typeof encrypted !== "string") {
             throw "Incorrect arguments";
         }
 
         var encrypted_length = encrypted.length;
 
-        if(encrypted_length != 60) {
+        if(encrypted_length !== 60) {
             return false;
         }
 
@@ -694,14 +696,14 @@
         var hash_data = hashSync(data, encrypted.substr(0, encrypted_length-31));
         var hash_data_length = hash_data.length;
 
-        same = hash_data_length == encrypted_length;
+        same = hash_data_length === encrypted_length;
 
         var max_length = (hash_data_length < encrypted_length) ? hash_data_length : encrypted_length;
 
         // to prevent timing attacks, should check entire string
         // don't exit after found to be false
         for (var i = 0; i < max_length; ++i) {
-            if (hash_data_length >= i && encrypted_length >= i && hash_data[i] != encrypted[i]) {
+            if (hash_data_length >= i && encrypted_length >= i && hash_data[i] !== encrypted[i]) {
                 same = false;
             }
         }
@@ -718,13 +720,13 @@
                 same - Second parameter to the callback providing whether the data and encrypted forms match [true | false].
         */
         if(!callback) {
-            throw "No callback function was given."
+            throw "No callback function was given.";
         }
         process.nextTick(function() {
             var result = null;
             var error = null;
             try {
-                result = compareSync(data, encrypted)
+                result = compareSync(data, encrypted);
             } catch(err) {
                 error = err;
             }
@@ -734,7 +736,7 @@
 
     function getRounds(encrypted) {
         //encrypted - [REQUIRED] - hash from which the number of rounds used should be extracted.
-        if(typeof encrypted != "string") {
+        if(typeof encrypted !== "string") {
             throw "Incorrect arguments";
         }
         return Number(encrypted.split("$")[2]);
