@@ -9,7 +9,7 @@
         "url": "https://github.com/fpirsch/twin-bcrypt.git"
     },
     "scripts": {
-        "test": "mocha"
+        "test": "mocha test/node-test.js"
     },
     "bugs": {
         "url": "https://github.com/fpirsch/twin-bcrypt/issues"
