@@ -653,12 +653,13 @@
         /*
             data - [REQUIRED] - the data to be encrypted.
             salt - [REQUIRED] - the salt to be used to hash the password. if specified as a number then a salt will be generated and used (see examples).
-            progress - a callback to be called during the hash calculation to signify progress
+            progress - [OPTIONAL] - a callback to be called during the hash calculation to signify progress
             callback - [REQUIRED] - a callback to be fired once the data has been encrypted. uses eio making it asynchronous.
                 error - First parameter to the callback detailing any errors.
                 encrypted - Second parameter to the callback providing the encrypted form.
         */
-        if(!callback) {
+        callback = callback || progress;
+        if (!callback) {
             throw "No callback function was given.";
         }
         process.nextTick(function() {
