@@ -584,9 +584,9 @@
     }
 
     function gensalt(rounds) {
-        var iteration_count = rounds;
+        var iteration_count = rounds || GENSALT_DEFAULT_LOG2_ROUNDS;
         if (iteration_count < 4 || iteration_count > 31) {
-            iteration_count = GENSALT_DEFAULT_LOG2_ROUNDS;
+            throw new Error("Invalid cost parameter.");
         }
         var output = [];
         output.push("$2a$");
@@ -609,7 +609,6 @@
     function genSaltSync(rounds) {
         /*
             rounds - [OPTIONAL] - the number of rounds to process the data for. (default - 10)
-            seed_length - [OPTIONAL] - RAND_bytes wants a length. to make that a bit flexible, you can specify a seed_length. (default - 20)
         */
         if(!rounds) {
             rounds = GENSALT_DEFAULT_LOG2_ROUNDS;
@@ -620,12 +619,15 @@
     function genSalt(rounds, callback) {
         /*
             rounds - [OPTIONAL] - the number of rounds to process the data for. (default - 10)
-            seed_length - [OPTIONAL] - RAND_bytes wants a length. to make that a bit flexible, you can specify a seed_length. (default - 20)
             callback - [REQUIRED] - a callback to be fired once the salt has been generated. uses eio making it asynchronous.
                 error - First parameter to the callback detailing any errors.
                 salt - Second parameter to the callback providing the generated salt.
         */
-        if(!callback) {
+        if (!callback && typeof rounds === 'function') {
+            callback = rounds;
+            rounds = undefined;
+        }
+        if (!callback) {
             throw "No callback function was given.";
         }
         process.nextTick(function() {
@@ -640,21 +642,21 @@
         });
     }
 
-    function hashSync(data, salt, progress) {
+    function hashSync(data, salt) {
         /*
             data - [REQUIRED] - the data to be encrypted.
-            salt - [REQUIRED] - the salt to be used in encryption.
+            salt - [REQUIRED] - the salt to be used in encryption. If specified as a number then a salt will be generated and used (see examples).
         */
-        if(!salt) {
-            salt = genSaltSync();
+        if (typeof salt === 'number') {
+            salt = genSaltSync(salt);
         }
-        return hashpw(data, salt, progress);
+        return hashpw(data, salt || genSaltSync());
     }
 
     function hash(data, salt, progress, callback) {
         /*
             data - [REQUIRED] - the data to be encrypted.
-            salt - [REQUIRED] - the salt to be used to hash the password. if specified as a number then a salt will be generated and used (see examples).
+            salt - [REQUIRED] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used (see examples).
             progress - [OPTIONAL] - a callback to be called during the hash calculation to signify progress
             callback - [REQUIRED] - a callback to be fired once the data has been encrypted. uses eio making it asynchronous.
                 error - First parameter to the callback detailing any errors.
