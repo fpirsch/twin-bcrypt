@@ -1,6 +1,6 @@
 {
     "name": "twin-bcrypt",
-    "version": "0.0.1",
+    "version": "0.0.1-alpha",
     "description": "Pure JavaScript BCrypt implement for NodeJS and the browser.",
     "author": "François Pirsch (https://github.com/fpirsch)",
     "main": "./twin-bcrypt",

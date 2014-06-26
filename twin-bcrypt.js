@@ -292,8 +292,6 @@
         var off = 0,
             rs = '',
             c1, c2;
-        if (len <= 0 || len > d.length)
-            throw "Invalid len";
         while (off < len) {
             // we could use only uint8 and get rid of this & 0xff
             c1 = d[off++] & 0xff;
@@ -333,7 +331,6 @@
         var olen = 0;
         var rs = [];
         var c1, c2, c3, c4, o;
-        if (maxolen <= 0) throw "Invalid maxolen";
         while (off < slen - 1 && olen < maxolen) {
             c1 = char64(s.charAt(off++));
             c2 = char64(s.charAt(off++));
@@ -480,10 +477,12 @@
         var clen = cdata.length;
         var one_percent;
 
-        if (log_rounds < 4 || log_rounds > 31)
-            throw "Bad number of rounds";
-        if (salt.length !== BCRYPT_SALT_LEN)
-            throw "Bad salt length";
+        if (log_rounds < 4 || log_rounds > 31) {
+            throw new Error('Invalid cost parameter');
+        }
+        if (salt.length !== BCRYPT_SALT_LEN) {
+            throw new Error('Bad salt length');
+        }
 
         rounds = 1 << log_rounds;
         one_percent = Math.floor(rounds / 100) + 1;
@@ -540,20 +539,23 @@
                 progress = function() {};
         }
 
-        if (salt.charAt(0) !== '$' || salt.charAt(1) !== '2')
-            throw "Invalid salt version";
-        if (salt.charAt(2) === '$')
+        if (salt.charAt(0) !== '$' || salt.charAt(1) !== '2') {
+            throw new Error('Invalid salt version');
+        }
+        if (salt.charAt(2) === '$') {
             off = 3;
+        }
         else {
             minor = salt.charAt(2);
             if (minor !== 'a' || salt.charAt(3) !== '$')
-                throw "Invalid salt revision";
+                throw new Error('Invalid salt revision');
             off = 4;
         }
 
         // Extract number of rounds
-        if (salt.charAt(off + 2) > '$')
-            throw "Missing salt rounds";
+        if (salt.charAt(off + 2) > '$') {
+            throw new Error('Missing salt rounds');
+        }
         var r1 = parseInt(salt.substring(off, off + 1)) * 10;
         var r2 = parseInt(salt.substring(off + 1, off + 2));
         rounds = r1 + r2;
@@ -586,7 +588,7 @@
     function gensalt(rounds) {
         var iteration_count = rounds || GENSALT_DEFAULT_LOG2_ROUNDS;
         if (iteration_count < 4 || iteration_count > 31) {
-            throw new Error("Invalid cost parameter.");
+            throw new Error('Invalid cost parameter.');
         }
         var output = [];
         output.push("$2a$");
@@ -595,12 +597,7 @@
         output.push(iteration_count.toString());
         output.push('$');
 
-        var rand_buf;
-        try {
-            rand_buf = crypto.randomBytes(BCRYPT_SALT_LEN);
-        } catch (ex) {
-            throw ex;
-        }
+        var rand_buf = crypto.randomBytes(BCRYPT_SALT_LEN);
 
         output.push(encode_base64(rand_buf, BCRYPT_SALT_LEN));
         return output.join('');
@@ -628,7 +625,7 @@
             rounds = undefined;
         }
         if (!callback) {
-            throw "No callback function was given.";
+            throw new Error('No callback function was given.');
         }
         process.nextTick(function() {
             var result = null;
@@ -664,7 +661,7 @@
         */
         callback = callback || progress;
         if (!callback) {
-            throw "No callback function was given.";
+            throw new Error('No callback function was given.');
         }
         process.nextTick(function() {
             var result = null;
@@ -685,7 +682,7 @@
         */
 
         if(typeof data !== "string" ||  typeof encrypted !== "string") {
-            throw "Incorrect arguments";
+            throw new Error('Incorrect arguments');
         }
 
         var encrypted_length = encrypted.length;
@@ -722,7 +719,7 @@
                 same - Second parameter to the callback providing whether the data and encrypted forms match [true | false].
         */
         if(!callback) {
-            throw "No callback function was given.";
+            throw new Error('No callback function was given.');
         }
         process.nextTick(function() {
             var result = null;
@@ -739,9 +736,9 @@
     function getRounds(encrypted) {
         //encrypted - [REQUIRED] - hash from which the number of rounds used should be extracted.
         if(typeof encrypted !== "string") {
-            throw "Incorrect arguments";
+            throw new Error('Incorrect argument');
         }
-        return Number(encrypted.split("$")[2]);
+        return +encrypted.split("$")[2];
     }
 
     exports.genSaltSync = genSaltSync;
@@ -754,7 +751,7 @@
 
 	exports.cryptoRNG = cryptoRNG;
     exports.randomBytes = randomBytes;
-	exports.version = "0.0.1";
+	exports.version = "0.0.1-alpha";
     exports.encode_base64 = encode_base64;
     exports.decode_base64 = decode_base64;
 }));
