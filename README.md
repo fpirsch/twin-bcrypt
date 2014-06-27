@@ -6,9 +6,8 @@ See the htpasswpd generator at http://aspirine.org/htpasswd_en.html for a live d
 
 ## TODO:
 This is work in progress...
-The first thing to do is to set up a decent set of tests. The jBCrypt test passes :-)
 
-The crypt_blowfish test suite fails, however. Non-ascii chars and $2x$ / $2y$ prefixes seem to be an issue.
+The test coverage is getting quite good. Most tests pass, but some still fail. That's how [BDD](https://en.wikipedia.org/wiki/Behavior-driven_development) works. Think of those failing tests not as flaws but as a TODO list : the initial project had a number of weaknesses and that's the point of creating twin-bcrypt.
 
 
 ## Basic usage:
@@ -40,9 +39,9 @@ Though you can use your custom salt and there is no need for salts to be persist
 
 ## API
 * `genSaltSync(cost)`
-    * `cost` - [OPTIONAL] - Default 10. This value is logarithmic, the actual number of iterations used will be 2**cost – increasing the cost by +1 will double the amount of time taken.
+    * `cost` - [OPTIONAL] - Default 10. This value is logarithmic, the actual number of iterations used will be 2<sup>cost</sup> : increasing the cost by 1 will double the amount of time taken.
 * `genSalt(cost, callback)`
-    * `cost` - [OPTIONAL] - Default 10. This value is logarithmic, the actual number of iterations used will be 2**cost – increasing the cost by +1 will double the amount of time taken.
+    * `cost` - [OPTIONAL] - Default 10. This value is logarithmic, the actual number of iterations used will be 2<sup>cost</sup> : increasing the cost by 1 will double the amount of time taken.
     * `callback` - [REQUIRED] - a callback to be fired once the salt has been generated.
         * `error` - First parameter to the callback detailing any errors.
         * `result` - Second parameter to the callback providing the generated salt.
