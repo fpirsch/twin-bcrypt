@@ -21,7 +21,8 @@
     <script src="../node_modules/mocha/mocha.js"></script>
     <script>
         mocha.setup('bdd');
-        var should = chai.should();
+        var should = chai.should(),
+            expect = chai.expect;
     </script>
     <script src="../twin-bcrypt.js"></script>
     <script>
@@ -29,6 +30,7 @@
             document.writeln('<script src="testsuite-jbcrypt.js"></scrip'+'t>');
         }
     </script>
+    <script src="testsuite-api.js"></script>
     <script src="testsuite-crypt-blowfish.js"></script>
     <script>
       mocha.run();
