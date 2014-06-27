@@ -27,6 +27,9 @@
         "crypto"
     ],
     "devDependencies": {
+        "gear": "*",
+        "gear-lib": "*",
+        "setimmediate": "1.*",
         "mocha": "*",
         "chai": "*"
     },
