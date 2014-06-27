@@ -39,10 +39,10 @@ In the above examples, the salt is automatically generated and attached to the h
 Though you can use your custom salt and there is no need for salts to be persisted as it will always be included in the final hash result and can be retrieved.
 
 ## API
-* `genSaltSync(rounds)`
-    * `rounds` - [OPTIONAL] - the number of rounds to process the data for. (default - 10)
-* `genSalt(rounds, callback)`
-    * `rounds` - [OPTIONAL] - the number of rounds to process the data for. (default - 10)
+* `genSaltSync(cost)`
+    * `cost` - [OPTIONAL] - Default 10. This value is logarithmic, the actual number of iterations used will be 2**cost – increasing the cost by +1 will double the amount of time taken.
+* `genSalt(cost, callback)`
+    * `cost` - [OPTIONAL] - Default 10. This value is logarithmic, the actual number of iterations used will be 2**cost – increasing the cost by +1 will double the amount of time taken.
     * `callback` - [REQUIRED] - a callback to be fired once the salt has been generated.
         * `error` - First parameter to the callback detailing any errors.
         * `result` - Second parameter to the callback providing the generated salt.

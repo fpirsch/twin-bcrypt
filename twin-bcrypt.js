@@ -587,7 +587,7 @@
 
     function genSaltSync(cost) {
         /*
-            cost - [OPTIONAL] - the cost parameter to process the data for. (default: 10)
+            cost - [OPTIONAL] - the cost parameter (default: 10). The number of iterations is 2^cost.
         */
         if (cost === undefined) cost = GENSALT_DEFAULT_LOG2_ROUNDS;
         cost = +cost|0;
@@ -601,16 +601,16 @@
         return output;
     }
 
-    function genSalt(rounds, callback) {
+    function genSalt(cost, callback) {
         /*
-            rounds - [OPTIONAL] - the number of rounds to process the data for. (default - 10)
+            cost - [OPTIONAL] - the cost parameter (default: 10). The number of iterations is 2^cost.
             callback - [REQUIRED] - a callback to be fired once the salt has been generated. uses eio making it asynchronous.
                 error - First parameter to the callback detailing any errors.
                 salt - Second parameter to the callback providing the generated salt.
         */
         if (!callback && typeof rounds === 'function') {
-            callback = rounds;
-            rounds = undefined;
+            callback = cost;
+            cost = undefined;
         }
         if (!callback) {
             throw new Error('No callback function was given.');
@@ -619,7 +619,7 @@
             var result = null;
             var error = null;
             try {
-                result = genSaltSync(rounds);
+                result = genSaltSync(cost);
             } catch(err) {
                 error = err;
             }
