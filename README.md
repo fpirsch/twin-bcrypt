@@ -38,13 +38,8 @@ In the above examples, the salt is automatically generated and attached to the h
 Though you can use your custom salt and there is no need for salts to be persisted as it will always be included in the final hash result and can be retrieved.
 
 ## API
-* `genSaltSync(cost)`
+* `genSalt(cost)`
     * `cost` - [OPTIONAL] - Default 10. This value is logarithmic, the actual number of iterations used will be 2<sup>cost</sup> : increasing the cost by 1 will double the amount of time taken.
-* `genSalt(cost, callback)`
-    * `cost` - [OPTIONAL] - Default 10. This value is logarithmic, the actual number of iterations used will be 2<sup>cost</sup> : increasing the cost by 1 will double the amount of time taken.
-    * `callback` - [REQUIRED] - a callback to be fired once the salt has been generated.
-        * `error` - First parameter to the callback detailing any errors.
-        * `result` - Second parameter to the callback providing the generated salt.
 * `hashSync(data, salt)`
     * `data` - [REQUIRED] - the data to be encrypted.
     * `salt` - [REQUIRED] - the salt to be used in encryption. If specified as a number then a salt will be generated and used.

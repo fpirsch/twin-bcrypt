@@ -585,7 +585,7 @@
         return(rs.join(''));
     }
 
-    function genSaltSync(cost) {
+    function genSalt(cost) {
         /*
             cost - [OPTIONAL] - the cost parameter (default: 10). The number of iterations is 2^cost.
         */
@@ -601,41 +601,15 @@
         return output;
     }
 
-    function genSalt(cost, callback) {
-        /*
-            cost - [OPTIONAL] - the cost parameter (default: 10). The number of iterations is 2^cost.
-            callback - [REQUIRED] - a callback to be fired once the salt has been generated. uses eio making it asynchronous.
-                error - First parameter to the callback detailing any errors.
-                salt - Second parameter to the callback providing the generated salt.
-        */
-        if (!callback && typeof rounds === 'function') {
-            callback = cost;
-            cost = undefined;
-        }
-        if (!callback) {
-            throw new Error('No callback function was given.');
-        }
-        process.nextTick(function() {
-            var result = null;
-            var error = null;
-            try {
-                result = genSaltSync(cost);
-            } catch(err) {
-                error = err;
-            }
-            callback(error, result);
-        });
-    }
-
     function hashSync(data, salt) {
         /*
             data - [REQUIRED] - the data to be encrypted.
             salt - [REQUIRED] - the salt to be used in encryption. If specified as a number then a salt will be generated and used (see examples).
         */
         if (typeof salt === 'number') {
-            salt = genSaltSync(salt);
+            salt = genSalt(salt);
         }
-        return hashpw(data, salt || genSaltSync());
+        return hashpw(data, salt || genSalt());
     }
 
     function hash(data, salt, progress, callback) {
@@ -651,7 +625,7 @@
         if (!callback) {
             throw new Error('No callback function was given.');
         }
-        process.nextTick(function() {
+        setImmediate(function() {
             var result = null;
             var error = null;
             try {
@@ -709,7 +683,7 @@
         if(!callback) {
             throw new Error('No callback function was given.');
         }
-        process.nextTick(function() {
+        setImmediate(function() {
             var result = null;
             var error = null;
             try {
@@ -721,7 +695,6 @@
         });
     }
 
-    exports.genSaltSync = genSaltSync;
     exports.genSalt = genSalt;
     exports.hashSync = hashSync;
     exports.hash = hash;

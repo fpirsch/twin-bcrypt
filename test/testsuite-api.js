@@ -29,7 +29,9 @@ describe('API test suite', function() {
             expect(function() { TwinBcrypt.genSaltSync(3); }).to.throw(Error, /cost|rounds/, "too low");
             expect(function() { TwinBcrypt.genSaltSync(32); }).to.throw(Error, /cost|rounds/, "too high");
         });
-
+    });
+/*
+    describe('Hash', function() {
         it('should be generated asynchronously with a default cost parameter', function(done) {
             TwinBcrypt.genSalt(function(error, result) {
                 expect(error).to.not.exist;
