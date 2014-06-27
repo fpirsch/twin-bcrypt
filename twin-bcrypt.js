@@ -585,32 +585,20 @@
         return(rs.join(''));
     }
 
-    function gensalt(rounds) {
-        var iteration_count = rounds || GENSALT_DEFAULT_LOG2_ROUNDS;
-        if (iteration_count < 4 || iteration_count > 31) {
+    function genSaltSync(cost) {
+        /*
+            cost - [OPTIONAL] - the cost parameter to process the data for. (default: 10)
+        */
+        if (cost === undefined) cost = GENSALT_DEFAULT_LOG2_ROUNDS;
+        cost = +cost|0;
+        if (isNaN(cost) || cost < 4 || cost > 31) {
             throw new Error('Invalid cost parameter.');
         }
-        var output = [];
-        output.push("$2a$");
-        if (iteration_count < 10)
-            output.push("0");
-        output.push(iteration_count.toString());
-        output.push('$');
-
-        var rand_buf = crypto.randomBytes(BCRYPT_SALT_LEN);
-
-        output.push(encode_base64(rand_buf, BCRYPT_SALT_LEN));
-        return output.join('');
-    }
-
-    function genSaltSync(rounds) {
-        /*
-            rounds - [OPTIONAL] - the number of rounds to process the data for. (default - 10)
-        */
-        if(!rounds) {
-            rounds = GENSALT_DEFAULT_LOG2_ROUNDS;
-        }
-        return gensalt(rounds);
+        var output = '$2a$';
+        if (cost < 10) output += '0';
+        output += cost + '$';
+        output += encode_base64(randomBytes(BCRYPT_SALT_LEN), BCRYPT_SALT_LEN);
+        return output;
     }
 
     function genSalt(rounds, callback) {
@@ -733,25 +721,15 @@
         });
     }
 
-    function getRounds(encrypted) {
-        //encrypted - [REQUIRED] - hash from which the number of rounds used should be extracted.
-        if(typeof encrypted !== "string") {
-            throw new Error('Incorrect argument');
-        }
-        return +encrypted.split("$")[2];
-    }
-
     exports.genSaltSync = genSaltSync;
     exports.genSalt = genSalt;
     exports.hashSync = hashSync;
     exports.hash = hash;
     exports.compareSync = compareSync;
     exports.compare = compare;
-    exports.getRounds = getRounds;
 
 	exports.cryptoRNG = cryptoRNG;
     exports.randomBytes = randomBytes;
+    exports.defaultCost = GENSALT_DEFAULT_LOG2_ROUNDS;
 	exports.version = "0.0.1-alpha";
-    exports.encode_base64 = encode_base64;
-    exports.decode_base64 = decode_base64;
 }));
