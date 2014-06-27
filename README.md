@@ -46,7 +46,7 @@ Though you can use your custom salt and there is no need for salts to be persist
 * `hash(data, salt, progress, cb)`
     * `data` - [REQUIRED] - the data to be encrypted.
     * `salt` - [REQUIRED] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used.
-    * `progress` - a callback to be called during the hash calculation to signify progress
+    * `progress` - [OPTIONAL] - a callback to be called during the hash calculation to signify progress
     * `callback` - [REQUIRED] - a callback to be fired once the data has been encrypted.
         * `error` - First parameter to the callback detailing any errors.
         * `result` - Second parameter to the callback providing the encrypted form.
