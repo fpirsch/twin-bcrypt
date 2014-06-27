@@ -48,10 +48,10 @@ Though you can use your custom salt and there is no need for salts to be persist
         * `result` - Second parameter to the callback providing the generated salt.
 * `hashSync(data, salt)`
     * `data` - [REQUIRED] - the data to be encrypted.
-    * `salt` - [REQUIRED] - the salt to be used in encryption.
+    * `salt` - [REQUIRED] - the salt to be used in encryption. If specified as a number then a salt will be generated and used.
 * `hash(data, salt, progress, cb)`
     * `data` - [REQUIRED] - the data to be encrypted.
-    * `salt` - [REQUIRED] - the salt to be used to hash the password.
+    * `salt` - [REQUIRED] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used.
     * `progress` - a callback to be called during the hash calculation to signify progress
     * `callback` - [REQUIRED] - a callback to be fired once the data has been encrypted.
         * `error` - First parameter to the callback detailing any errors.
@@ -65,8 +65,6 @@ Though you can use your custom salt and there is no need for salts to be persist
     * `callback` - [REQUIRED] - a callback to be fired once the data has been compared.
         * `error` - First parameter to the callback detailing any errors.
         * `result` - Second parameter to the callback providing whether the data and encrypted forms match [true | false].
-* `getRounds(encrypted)` - return the number of rounds used to encrypt a given hash
-    * `encrypted` - [REQUIRED] - hash from which the number of rounds used should be extracted.
 
 
 ## Credits
