@@ -540,7 +540,7 @@
         }
 
         if (salt.charAt(0) !== '$' || salt.charAt(1) !== '2') {
-            throw new Error('Invalid salt version');
+            throw new Error('Invalid salt version');    // TODO inaccurate
         }
         if (salt.charAt(2) === '$') {
             off = 3;
@@ -604,25 +604,36 @@
     function hashSync(data, salt) {
         /*
             data - [REQUIRED] - the data to be encrypted.
-            salt - [REQUIRED] - the salt to be used in encryption. If specified as a number then a salt will be generated and used (see examples).
+            salt - [OPTIONAL] - the salt to be used in encryption. If specified as a number then a salt will be generated and used (see examples).
         */
-        if (typeof salt === 'number') {
-            salt = genSalt(salt);
-        }
+        if (typeof data !== 'string') throw new Error('Incorrect arguments');
+        if (typeof salt === 'number') salt = genSalt(salt);
         return hashpw(data, salt || genSalt());
     }
 
     function hash(data, salt, progress, callback) {
         /*
             data - [REQUIRED] - the data to be encrypted.
-            salt - [REQUIRED] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used (see examples).
+            salt - [OPTIONAL] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used (see examples).
             progress - [OPTIONAL] - a callback to be called during the hash calculation to signify progress
             callback - [REQUIRED] - a callback to be fired once the data has been encrypted. uses eio making it asynchronous.
                 error - First parameter to the callback detailing any errors.
                 encrypted - Second parameter to the callback providing the encrypted form.
         */
-        callback = callback || progress;
-        if (!callback) {
+        if (typeof data !== 'string') throw new Error('Incorrect arguments');
+        if (arguments.length === 2) {
+            callback = salt;
+            salt = progress = null;
+        }
+        else if (arguments.length === 3) {
+            callback = progress;
+            if (typeof salt === 'function') {
+                progress = salt;
+                salt = null;
+            }
+            // TODO salt = number ou string ?
+        }
+        if (!callback || typeof callback !== 'function') {
             throw new Error('No callback function was given.');
         }
         setImmediate(function() {
