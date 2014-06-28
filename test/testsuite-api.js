@@ -1,6 +1,24 @@
 /* jshint expr: true */
 /* global chai, describe, it, expect, TwinBcrypt */
 
+function Spy() {
+    var count = 0;
+    var sp = function() {
+        count++;
+    };
+    sp.should = {
+        have: {
+            been: {
+                called: function() {
+                    count.should.be.above(1);
+                }
+            }
+        }
+    };
+    return sp;
+}
+
+
 describe('API test suite', function() {
 
 
@@ -80,7 +98,8 @@ describe('API test suite', function() {
                     result.should.equal(HASH4);
                     done();
                 });
-                var spy = chai.spy();
+                //var spy = chai.spy();
+                var spy = Spy();
                 TwinBcrypt.hash('password', SALT, spy, function(error, result) {
                     expect(error).to.not.exist;
                     result.should.equal(HASH4);
@@ -90,8 +109,9 @@ describe('API test suite', function() {
             });
 
             it('should be generated with (password, progress, callback)', function(done) {
-                var spy = chai.spy();
-                TwinBcrypt.hash('password', spy, function(error, result) {
+                //var spy = chai.spy();
+                var spy = Spy();
+                TwinBcrypt.hash('password', noop, function(error, result) {
                     expect(error).to.not.exist;
                     result.should.match(DEFAULT_HASH);
                     spy.should.have.been.called();
@@ -140,20 +160,6 @@ describe('API test suite', function() {
 
 
 /*
-hashSync(data, salt)
-
-    data - [REQUIRED] - the data to be encrypted.
-    salt - [OPTIONAL] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used (see examples).
-
-hash(data, salt, progress, cb)
-
-    data - [REQUIRED] - the data to be encrypted.
-    salt - [OPTIONAL] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used (see examples).
-    progress - [OPTIONAL] - a callback to be called during the hash calculation to signify progress
-    callback - [REQUIRED] - a callback to be fired once the data has been encrypted.
-        error - First parameter to the callback detailing any errors.
-        result - Second parameter to the callback providing the encrypted form.
-
 compareSync(data, encrypted)
 
     data - [REQUIRED] - data to compare.
