@@ -31,7 +31,8 @@
         "gear-lib": "*",
         "setimmediate": "1.*",
         "mocha": "*",
-        "chai": "*"
+        "chai": "*",
+        "chai-spies": "*"
     },
     "license": "BSD-3-Clause"
 }
