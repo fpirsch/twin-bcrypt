@@ -492,38 +492,32 @@
 
         ekskey(salt, password, P, S);
 
-        var i = 0;
+        var start = new Date();
+        for (var i = 0; i < rounds; i++) {
+            expandKey(password, P, S);
+            expandKey(salt, P, S);
+            if (i % one_percent) {
+                progress();
+            }
+            // TODO bug here
+            //if (new Date() - start > MAX_EXECUTION_TIME) {
+                //break;
+            //}
+        }
 
-        while (true) {
-            if (i < rounds) {
-                var start = new Date();
-                for (; i < rounds;) {
-                    i = i + 1;
-                    expandKey(password, P, S);
-                    expandKey(salt, P, S);
-                    if (i % one_percent) {
-                        progress();
-                    }
-                    if (new Date() - start > MAX_EXECUTION_TIME) {
-                        break;
-                    }
-                }
-            } else {
-                for (i = 0; i < 64; i++) {
-                    for (j = 0; j < (clen >> 1); j++) {
-                        var lr = encipher(cdata, j << 1, P, S);
-                    }
-                }
-                var ret = [];
-                for (i = 0; i < clen; i++) {
-                    ret.push(getByte((cdata[i] >> 24) & 0xff));
-                    ret.push(getByte((cdata[i] >> 16) & 0xff));
-                    ret.push(getByte((cdata[i] >> 8) & 0xff));
-                    ret.push(getByte(cdata[i] & 0xff));
-                }
-                return ret;
+        for (i = 0; i < 64; i++) {
+            for (j = 0; j < (clen >> 1); j++) {
+                var lr = encipher(cdata, j << 1, P, S);
             }
         }
+        var ret = [];
+        for (i = 0; i < clen; i++) {
+            ret.push(getByte((cdata[i] >> 24) & 0xff));
+            ret.push(getByte((cdata[i] >> 16) & 0xff));
+            ret.push(getByte((cdata[i] >> 8) & 0xff));
+            ret.push(getByte(cdata[i] & 0xff));
+        }
+        return ret;
     }
 
     function hashpw(password, salt, progress) {
