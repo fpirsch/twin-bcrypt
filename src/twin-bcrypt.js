@@ -505,10 +505,10 @@
         }
         var ret = [];
         for (i = 0; i < clen; i++) {
-            ret.push(getByte((cdata[i] >> 24) & 0xff));
-            ret.push(getByte((cdata[i] >> 16) & 0xff));
-            ret.push(getByte((cdata[i] >> 8) & 0xff));
-            ret.push(getByte(cdata[i] & 0xff));
+            ret.push((cdata[i] >> 24) & 0xff);
+            ret.push((cdata[i] >> 16) & 0xff);
+            ret.push((cdata[i] >> 8) & 0xff);
+            ret.push(cdata[i] & 0xff);
         }
         return ret;
     }
