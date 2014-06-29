@@ -642,22 +642,20 @@
         });
     }
 
+
+    var HASH_PATTERN = /^\$2a\$(0[4-9]|[12][0-9]|3[01])\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/;
+
     function compareSync(data, encrypted) {
         /*
             data - [REQUIRED] - data to compare.
             encrypted - [REQUIRED] - data to be compared to.
         */
 
-        if(typeof data !== "string" ||  typeof encrypted !== "string") {
+        if(typeof data !== 'string' ||  typeof encrypted !== 'string' || !HASH_PATTERN.test(encrypted)) {
             throw new Error('Incorrect arguments');
         }
 
         var encrypted_length = encrypted.length;
-
-        if(encrypted_length !== 60) {
-            return false;
-        }
-
         var same = true;
         var hash_data = hashSync(data, encrypted.substr(0, encrypted_length-31));
         var hash_data_length = hash_data.length;

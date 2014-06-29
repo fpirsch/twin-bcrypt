@@ -169,12 +169,53 @@ describe('API test suite', function() {
     });
 
 
+    describe('Compare', function() {
+        var SALT4 = '$2a$04$......................',
+            SALT7 = '$2a$07$......................',
+            HASH4 = '$2a$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm',
+            HASH7 = '$2a$07$......................rkNUWThr5KSHevvQDxRDSYaalST.SGy',
+            COST_4_HASH = /^\$2a\$04\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/,
+            COST_7_HASH = /^\$2a\$07\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/,
+            DEFAULT_HASH = new RegExp('^\\$2a\\$'+TwinBcrypt.defaultCost+'\\$[./A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$'),
+            noop = function() {};
+
+        describe('Synchronous', function() {
+            it('should throw when arguments are incomplete or invalid', function() {
+                expect(function() { TwinBcrypt.compareSync(); }).to.throw(Error, /password|data|argument/);
+                expect(function() { TwinBcrypt.compareSync('password'); }).to.throw(Error, /data|argument/);
+                expect(function() { TwinBcrypt.compareSync('password', 4); }).to.throw(Error, /data|argument/);
+                expect(function() {
+                    TwinBcrypt.compareSync('password', '$2a$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5QdjhmA');
+                }).to.throw(Error, /data|argument/);
+                expect(function() {
+                    TwinBcrypt.compareSync('password', '$2a$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjh');
+                }).to.throw(Error, /data|argument/);
+                expect(function() {
+                    TwinBcrypt.compareSync('password', '$2a!04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm').to.be.false;
+                }).to.throw(Error, /data|argument/);
+                expect(function() {
+                    TwinBcrypt.compareSync('password', '$2b$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm').to.be.false;
+                }).to.throw(Error, /data|argument/);
+                expect(function() {
+                    TwinBcrypt.compareSync('password', '$3a$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm').to.be.false;
+                }).to.throw(Error, /data|argument/);
+                expect(function() {
+                    TwinBcrypt.compareSync('password', '$2a$K4$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm').to.be.false;
+                }).to.throw(Error, /data|argument/);
+            });
+
+            it('should return false when the password doesn\'t match.', function() {
+                var bad = HASH4.replace(/.$/, '6');
+                TwinBcrypt.compareSync('password', bad).should.be.false;
+            });
+
+            it('should return true when the password matches.', function() {
+                TwinBcrypt.compareSync('password', HASH4).should.be.true;
+            });
+        });
+
 /*
-compareSync(data, encrypted)
-
-    data - [REQUIRED] - data to compare.
-    encrypted - [REQUIRED] - data to be compared to.
-
+TODO Asynchronous
 compare(data, encrypted, cb)
 
     data - [REQUIRED] - data to compare.
@@ -184,5 +225,7 @@ compare(data, encrypted, cb)
         result - Second parameter to the callback providing whether the data and encrypted forms match [true | false].
 
 */
+
+    });
 
 });

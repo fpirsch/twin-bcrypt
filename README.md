@@ -50,9 +50,10 @@ Though you can use your custom salt and there is no need for salts to be persist
     * `callback` - [REQUIRED] - a callback to be fired once the data has been encrypted.
         * `error` - First parameter to the callback detailing any errors.
         * `result` - Second parameter to the callback providing the encrypted form.
-* `compareSync(data, encrypted)`
-    * `data` - [REQUIRED] - data to compare.
-    * `encrypted` - [REQUIRED] - data to be compared to.
+* `compareSync(password, hash)`
+    * `password` - [REQUIRED] - password to check.
+    * `hash` - [REQUIRED] - reference hash to check the password against.
+    Returns true if the password matches, false if it doesn't. Throws an error if arguments are invalid.
 * `compare(data, encrypted, cb)`
     * `data` - [REQUIRED] - data to compare.
     * `encrypted` - [REQUIRED] - data to be compared to.
