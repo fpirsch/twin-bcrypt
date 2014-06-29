@@ -520,6 +520,7 @@
         return ret;
     }
 
+
     function hashpw(password, salt, progress) {
         var real_salt;
         var passwordb = [];
@@ -595,6 +596,8 @@
         return output;
     }
 
+    var SALT_PATTERN = /^\$2a\$(0[4-9]|[12][0-9]|3[01])\$[.\/A-Za-z0-9]{21}[.Oeu]/;
+
     function hashSync(data, salt) {
         /*
             data - [REQUIRED] - the data to be encrypted.
@@ -602,6 +605,7 @@
         */
         if (typeof data !== 'string') throw new Error('Incorrect arguments');
         if (!salt || typeof salt === 'number') salt = genSalt(salt);
+        else if (!SALT_PATTERN.test(salt)) throw new Error('Invalid salt');
         return hashpw(data, salt);
     }
 
@@ -627,6 +631,7 @@
             }
         }
         if (!salt || typeof salt === 'number') salt = genSalt(salt);
+        else if (!SALT_PATTERN.test(salt)) throw new Error('Invalid salt');
         if (!callback || typeof callback !== 'function') {
             throw new Error('No callback function was given.');
         }

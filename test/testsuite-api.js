@@ -67,14 +67,20 @@ describe('API test suite', function() {
             it('should be generated with salt given as a number', function() {
                 TwinBcrypt.hashSync('password', 4).should.match(COST_4_HASH, 'as integer');
                 TwinBcrypt.hashSync('password', 4.8).should.match(COST_4_HASH, 'as float');
-                expect(function() {
-                    TwinBcrypt.hashSync('password', '4');
-                }).to.throw(Error, /salt/, 'as string');
+                expect(function() { TwinBcrypt.hashSync('password', '4'); }).to.throw(Error, /salt/, 'as string');
             });
 
             it('should be generated with default salt generation', function() {
                 TwinBcrypt.hashSync('password').should.match(DEFAULT_HASH);
             });
+
+            it('should reject bad salts', function() {
+                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.....é................'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.............-........'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.....................'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.....................A'); }).to.throw(Error, /salt/);
+            });
+
         });
 
 
@@ -95,12 +101,11 @@ describe('API test suite', function() {
                 expect(function() { TwinBcrypt.hash('password', noop, noop, SALT4); }).to.throw(Error, /salt|callback|argument/);
             });
 
-            it('should reject an invalid salt', function(done) {
-                TwinBcrypt.hash('password', '$2a$04$.............', function(error, result) {
-                    expect(error).to.match(/salt/);
-                    expect(result).to.not.exist;
-                    done();
-                });
+            it('should reject bad salts', function() {
+                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.....é................'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.............-........'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.....................'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.....................A'); }).to.throw(Error, /salt/);
             });
 
             it('should accept (password, callback)', function(done) {
