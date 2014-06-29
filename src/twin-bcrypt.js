@@ -645,31 +645,31 @@
 
     var HASH_PATTERN = /^\$2a\$(0[4-9]|[12][0-9]|3[01])\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/;
 
-    function compareSync(data, encrypted) {
+    function compareSync(password, refhash) {
         /*
-            data - [REQUIRED] - data to compare.
-            encrypted - [REQUIRED] - data to be compared to.
+            password - [REQUIRED] - password to check.
+            hash - [REQUIRED] - reference hash to check the password against.
         */
 
-        if (typeof data !== 'string' ||  typeof encrypted !== 'string' || !HASH_PATTERN.test(encrypted)) {
+        if (typeof password !== 'string' ||  typeof refhash !== 'string' || !HASH_PATTERN.test(refhash)) {
             throw new Error('Incorrect arguments');
         }
 
-        var salt = encrypted.substr(0, encrypted.length - 31),
-            hashed = hashSync(data, salt);
-        return hashed === encrypted;
+        var salt = refhash.substr(0, refhash.length - 31),
+            hashedpw = hashSync(password, salt);
+        return hashedpw === refhash;
     }
 
-    function compare(data, encrypted, progress, callback) {
+    function compare(password, refhash, progress, callback) {
         /*
-            data - [REQUIRED] - data to compare.
-            encrypted - [REQUIRED] - data to be compared to.
+            password - [REQUIRED] - password to check.
+            hash - [REQUIRED] - reference hash to check the password against.
             progress - [OPTIONAL] - a callback to be called during the hash verification to signify progress
             callback - [REQUIRED] - a callback to be fired once the data has been compared. uses eio making it asynchronous.
                 error - First parameter to the callback detailing any errors.
                 same - Second parameter to the callback providing whether the data and encrypted forms match [true | false].
         */
-        if (typeof data !== 'string' ||  typeof encrypted !== 'string' || !HASH_PATTERN.test(encrypted)) {
+        if (typeof password !== 'string' ||  typeof refhash !== 'string' || !HASH_PATTERN.test(refhash)) {
             throw new Error('Incorrect arguments');
         }
         if (!callback) {
@@ -679,9 +679,9 @@
         if (!callback || typeof callback !== 'function') {
             throw new Error('No callback function was given.');
         }
-        var salt = encrypted.substr(0, encrypted.length - 31);
-        hash(data, salt, progress, function(error, result) {
-            callback(error, result === encrypted);
+        var salt = refhash.substr(0, refhash.length - 31);
+        hash(password, salt, progress, function(error, result) {
+            callback(error, result === refhash);
         });
     }
 
