@@ -477,13 +477,6 @@
         var clen = cdata.length;
         var one_percent;
 
-        if (log_rounds < 4 || log_rounds > 31) {
-            throw new Error('Invalid cost parameter');
-        }
-        if (salt.length !== BCRYPT_SALT_LEN) {
-            throw new Error('Bad salt length');
-        }
-
         rounds = 1 << log_rounds;
         one_percent = Math.floor(rounds / 100) + 1;
 
@@ -496,7 +489,7 @@
         for (var i = 0; i < rounds; i++) {
             expandKey(password, P, S);
             expandKey(salt, P, S);
-            if (i % one_percent) {
+            if (i % one_percent && progress) {
                 progress();
             }
             // TODO bug here
@@ -521,41 +514,20 @@
     }
 
 
+    /**
+     * password must be a string
+     * salt must be a valid string
+     * progress, if present, must be a function.
+     */
     function hashpw(password, salt, progress) {
-        var real_salt;
         var passwordb = [];
         var saltb = [];
         var hashed = [];
-        var minor = String.fromCharCode(0);
-        var rounds = 0;
         var off = 0;
 
-        if (!progress){
-                progress = function() {};
-        }
-
-        if (salt.charAt(0) !== '$' || salt.charAt(1) !== '2') {
-            throw new Error('Invalid salt version');    // TODO inaccurate
-        }
-        if (salt.charAt(2) === '$') {
-            off = 3;
-        }
-        else {
-            minor = salt.charAt(2);
-            if (minor !== 'a' || salt.charAt(3) !== '$')
-                throw new Error('Invalid salt revision');
-            off = 4;
-        }
-
-        // Extract number of rounds
-        if (salt.charAt(off + 2) > '$') {
-            throw new Error('Missing salt rounds');
-        }
-        var r1 = parseInt(salt.substring(off, off + 1)) * 10;
-        var r2 = parseInt(salt.substring(off + 1, off + 2));
-        rounds = r1 + r2;
-        real_salt = salt.substring(off + 3, off + 25);
-        password = password + (minor >= 'a' ? "\x00" : "");
+        var rounds = +salt.substr(4, 2);
+        var real_salt = salt.substr(7, 22);
+        password += '\x00';     // not for $2$ passwords
 
         var buf = newBuffer(password);
         for (var r = 0; r < buf.length; r++) {
@@ -564,20 +536,12 @@
         saltb = decode_base64(real_salt, BCRYPT_SALT_LEN);
         hashed = crypt_raw(passwordb, saltb, rounds, progress);
 
-        var rs = [];
-        rs.push("$2");
-        if (minor >= 'a')
-            rs.push(minor);
-        rs.push("$");
-        if (rounds < 10)
-            rs.push("0");
-        rs.push(rounds.toString());
-        rs.push("$");
-        rs.push(encode_base64(saltb, BCRYPT_SALT_LEN));
+        var rs = '$2a$';
+        if (rounds < 10) rs += '0';
+        rs += rounds + '$' + encode_base64(saltb, BCRYPT_SALT_LEN);
         // This has to be bug-compatible with the original implementation, so only encode 23 of the 24 bytes.
-        rs.push(encode_base64(hashed, 23));
-
-        return(rs.join(''));
+        rs += encode_base64(hashed, 23);
+        return rs;
     }
 
     function genSalt(cost) {
@@ -605,7 +569,7 @@
         */
         if (typeof data !== 'string') throw new Error('Incorrect arguments');
         if (!salt || typeof salt === 'number') salt = genSalt(salt);
-        else if (!SALT_PATTERN.test(salt)) throw new Error('Invalid salt');
+        else if (typeof salt !== 'string' || !SALT_PATTERN.test(salt)) throw new Error('Invalid salt');
         return hashpw(data, salt);
     }
 
@@ -631,18 +595,14 @@
             }
         }
         if (!salt || typeof salt === 'number') salt = genSalt(salt);
-        else if (!SALT_PATTERN.test(salt)) throw new Error('Invalid salt');
+        else if (typeof salt !== 'string' || !SALT_PATTERN.test(salt)) throw new Error('Invalid salt');
         if (!callback || typeof callback !== 'function') {
             throw new Error('No callback function was given.');
         }
         setImmediate(function() {
             var result = null;
             var error = null;
-            try {
-                result = hashpw(data, salt, progress);
-            } catch(err) {
-                error = err;
-            }
+            result = hashpw(data, salt, progress);
             callback(error, result);
         });
     }

@@ -44,11 +44,11 @@ describe('crypt_blowfish test suite', function() {
     });
 
     it('should reject bad salts', function() {
-        should.Throw(function() { TwinBcrypt.hashSync("some password", "$2a$03$CCCCCCCCCCCCCCCCCCCCC."); }, /cost|rounds/);
-        should.Throw(function() { TwinBcrypt.hashSync("some password", "$2a$32$CCCCCCCCCCCCCCCCCCCCC."); }, /cost|rounds/);
-        should.Throw(function() { TwinBcrypt.hashSync("some password", "$2z$05$CCCCCCCCCCCCCCCCCCCCC."); }, /salt|prefix/);
-        should.Throw(function() { TwinBcrypt.hashSync("some password", "$2`$05$CCCCCCCCCCCCCCCCCCCCC."); }, /salt|prefix/);
-        should.Throw(function() { TwinBcrypt.hashSync("some password", "$2{$05$CCCCCCCCCCCCCCCCCCCCC."); }, /salt|prefix/);
+        should.Throw(function() { TwinBcrypt.hashSync("some password", "$2a$03$CCCCCCCCCCCCCCCCCCCCC."); }, /cost|rounds|salt/);
+        should.Throw(function() { TwinBcrypt.hashSync("some password", "$2a$32$CCCCCCCCCCCCCCCCCCCCC."); }, /cost|rounds|salt/);
+        should.Throw(function() { TwinBcrypt.hashSync("some password", "$2z$05$CCCCCCCCCCCCCCCCCCCCC."); }, /salt|prefix|salt/);
+        should.Throw(function() { TwinBcrypt.hashSync("some password", "$2`$05$CCCCCCCCCCCCCCCCCCCCC."); }, /salt|prefix|salt/);
+        should.Throw(function() { TwinBcrypt.hashSync("some password", "$2{$05$CCCCCCCCCCCCCCCCCCCCC."); }, /salt|prefix|salt/);
     });
 
 
