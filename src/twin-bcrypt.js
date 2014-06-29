@@ -1,4 +1,4 @@
-/* jshint node: true, browser: true, nonstandard: true, eqeqeq: true */
+/* jshint node: true, browser: true, nonstandard: true, eqeqeq: true, eqnull: true */
 
 (function (root, factory) {
     if (typeof exports === 'object') {
@@ -589,7 +589,7 @@
         /*
             cost - [OPTIONAL] - the cost parameter (default: 10). The number of iterations is 2^cost.
         */
-        if (cost === undefined) cost = GENSALT_DEFAULT_LOG2_ROUNDS;
+        if (cost == null) cost = GENSALT_DEFAULT_LOG2_ROUNDS;
         cost = +cost|0;
         if (isNaN(cost) || cost < 4 || cost > 31) {
             throw new Error('Invalid cost parameter.');
@@ -607,8 +607,8 @@
             salt - [OPTIONAL] - the salt to be used in encryption. If specified as a number then a salt will be generated and used (see examples).
         */
         if (typeof data !== 'string') throw new Error('Incorrect arguments');
-        if (typeof salt === 'number') salt = genSalt(salt);
-        return hashpw(data, salt || genSalt());
+        if (!salt || typeof salt === 'number') salt = genSalt(salt);
+        return hashpw(data, salt);
     }
 
     function hash(data, salt, progress, callback) {
@@ -631,8 +631,8 @@
                 progress = salt;
                 salt = null;
             }
-            // TODO salt = number ou string ?
         }
+        if (!salt || typeof salt === 'number') salt = genSalt(salt);
         if (!callback || typeof callback !== 'function') {
             throw new Error('No callback function was given.');
         }
@@ -640,7 +640,7 @@
             var result = null;
             var error = null;
             try {
-                result = hashSync(data, salt, progress);
+                result = hashpw(data, salt, progress);
             } catch(err) {
                 error = err;
             }
