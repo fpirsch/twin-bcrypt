@@ -38,13 +38,16 @@
 		}
 	}
 
-	// The browser way to do this. We don't do the Buffer thing.
+    // utf-8 conversion in both browsers and Node.
 	function string2utf8Bytes(s) {
-		return unescape(encodeURIComponent(s)).split('').map(function(c){return c.charCodeAt(0);});
+        var utf8 = unescape(encodeURIComponent(s)),
+            len = utf8.length,
+            bytes = new Array(len);
+        for(var i = 0; i < len; i++) {
+            bytes[i] = utf8.charCodeAt(i);
+        }
+        return bytes;
 	}
-
-    var newBuffer = (typeof Buffer === 'undefined') ? string2utf8Bytes : Buffer;
-
 
     var BCRYPT_SALT_LEN = 16;
 
@@ -480,21 +483,13 @@
      * progress, if present, must be a function.
      */
     function hashpw(password, salt, progress) {
-        var passwordb = [];
-        var saltb = [];
-        var hashed = [];
-        var off = 0;
-
         var rounds = +salt.substr(4, 2);
         var real_salt = salt.substr(7, 22);
         password += '\x00';     // not for $2$ passwords
 
-        var buf = newBuffer(password);
-        for (var r = 0; r < buf.length; r++) {
-            passwordb.push(buf[r]);
-        }
-        saltb = decode_base64(real_salt, BCRYPT_SALT_LEN);
-        hashed = crypt_raw(passwordb, saltb, rounds, progress);
+        var passwordb = string2utf8Bytes(password);
+        var saltb = decode_base64(real_salt, BCRYPT_SALT_LEN);
+        var hashed = crypt_raw(passwordb, saltb, rounds, progress);
 
         var rs = '$2a$';
         if (rounds < 10) rs += '0';
