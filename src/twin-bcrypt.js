@@ -651,50 +651,37 @@
             encrypted - [REQUIRED] - data to be compared to.
         */
 
-        if(typeof data !== 'string' ||  typeof encrypted !== 'string' || !HASH_PATTERN.test(encrypted)) {
+        if (typeof data !== 'string' ||  typeof encrypted !== 'string' || !HASH_PATTERN.test(encrypted)) {
             throw new Error('Incorrect arguments');
         }
 
-        var encrypted_length = encrypted.length;
-        var same = true;
-        var hash_data = hashSync(data, encrypted.substr(0, encrypted_length-31));
-        var hash_data_length = hash_data.length;
-
-        same = hash_data_length === encrypted_length;
-
-        var max_length = (hash_data_length < encrypted_length) ? hash_data_length : encrypted_length;
-
-        // to prevent timing attacks, should check entire string
-        // don't exit after found to be false
-        for (var i = 0; i < max_length; ++i) {
-            if (hash_data_length >= i && encrypted_length >= i && hash_data[i] !== encrypted[i]) {
-                same = false;
-            }
-        }
-
-        return same;
+        var salt = encrypted.substr(0, encrypted.length - 31),
+            hashed = hashSync(data, salt);
+        return hashed === encrypted;
     }
 
-    function compare(data, encrypted, callback) {
+    function compare(data, encrypted, progress, callback) {
         /*
             data - [REQUIRED] - data to compare.
             encrypted - [REQUIRED] - data to be compared to.
+            progress - [OPTIONAL] - a callback to be called during the hash verification to signify progress
             callback - [REQUIRED] - a callback to be fired once the data has been compared. uses eio making it asynchronous.
                 error - First parameter to the callback detailing any errors.
                 same - Second parameter to the callback providing whether the data and encrypted forms match [true | false].
         */
-        if(!callback) {
+        if (typeof data !== 'string' ||  typeof encrypted !== 'string' || !HASH_PATTERN.test(encrypted)) {
+            throw new Error('Incorrect arguments');
+        }
+        if (!callback) {
+            callback = progress;
+            progress = null;
+        }
+        if (!callback || typeof callback !== 'function') {
             throw new Error('No callback function was given.');
         }
-        setImmediate(function() {
-            var result = null;
-            var error = null;
-            try {
-                result = compareSync(data, encrypted);
-            } catch(err) {
-                error = err;
-            }
-            callback(error, result);
+        var salt = encrypted.substr(0, encrypted.length - 31);
+        hash(data, salt, progress, function(error, result) {
+            callback(error, result === encrypted);
         });
     }
 
