@@ -265,28 +265,12 @@
             0x63727944, 0x6f756274];
 
     var base64_code = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var index_64 = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1,
+    var index_64 = [0, 1,
             54, 55, 56, 57, 58, 59, 60, 61, 62, 63, -1, -1, -1, -1, -1, -1, -1,
             2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
             21, 22, 23, 24, 25, 26, 27, -1, -1, -1, -1, -1, -1, 28, 29, 30, 31,
             32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
             49, 50, 51, 52, 53, -1, -1, -1, -1, -1];
-
-    function getByte(c) {
-        var ret = 0,b ;
-        try {
-            b = c.charCodeAt(0);
-        } catch (err) {
-            b = c;
-        }
-        if (b > 127) {
-            return -128 + (b % 128);
-        } else {
-            return b;
-        }
-    }
 
     function encode_base64(d, len) {
         var off = 0,
@@ -317,53 +301,29 @@
         return rs;
     }
 
-    function char64(x) {
-        var code = x.charCodeAt(0);
-        if (code < 0 || code > index_64.length) {
-            return -1;
-        }
-        return index_64[code];
-    }
+    /**
+     * salt is a 22 character string from the alphabet
+     * './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+     * returns an Uint8Array of 16 bytes.
+     */
+    function decode_base64(salt) {
+        var decoded = new Array(16);
+        var i = 0, j = 0, c1, c2;
+        while(true) {
+            c1 = index_64[salt.charCodeAt(i++)-46];
+            c2 = index_64[salt.charCodeAt(i++)-46];
+            decoded[j++] = (c1 << 2 | c2 >> 4) & 0xff;
+            if (i === 22) break;
+            
+            c1 = c2 << 4;
+            c2 = index_64[salt.charCodeAt(i++)-46];
+            decoded[j++] = (c1 | c2 >> 2) & 0xff;
 
-    function decode_base64(s, maxolen) {
-        var off = 0;
-        var slen = s.length;
-        var olen = 0;
-        var rs = [];
-        var c1, c2, c3, c4, o;
-        while (off < slen - 1 && olen < maxolen) {
-            c1 = char64(s.charAt(off++));
-            c2 = char64(s.charAt(off++));
-            if (c1 === -1 || c2 === -1) {
-                break;
-            }
-            o = getByte(c1 << 2);
-            o |= (c2 & 0x30) >> 4;
-            rs.push(String.fromCharCode(o));
-            if (++olen >= maxolen || off >= slen) {
-                break;
-            }
-            c3 = char64(s.charAt(off++));
-            if (c3 === -1) {
-                break;
-            }
-            o = getByte((c2 & 0x0f) << 4);
-            o |= (c3 & 0x3c) >> 2;
-            rs.push(String.fromCharCode(o));
-            if (++olen >= maxolen || off >= slen) {
-                break;
-            }
-            c4 = char64(s.charAt(off++));
-            o = getByte((c3 & 0x03) << 6);
-            o |= c4;
-            rs.push(String.fromCharCode(o));
-            ++olen;
+            c1 = c2 << 6;
+            c2 = index_64[salt.charCodeAt(i++)-46];
+            decoded[j++] = (c1 | c2) & 0xff;
         }
-        var ret = [];
-        for (off = 0; off < olen; off++) {
-            ret.push(getByte(rs[off]));
-        }
-        return ret;
+        return decoded;
     }
 
     function encipher(lr, off, P, S) {
@@ -500,7 +460,7 @@
 
         for (i = 0; i < 64; i++) {
             for (j = 0; j < (clen >> 1); j++) {
-                var lr = encipher(cdata, j << 1, P, S);
+                encipher(cdata, j << 1, P, S);
             }
         }
         var ret = [];
