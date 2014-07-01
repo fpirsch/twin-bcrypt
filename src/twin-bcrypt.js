@@ -340,14 +340,14 @@
         l ^= P[0];
         for (i = 0; i <= BLOWFISH_NUM_ROUNDS - 2;) {
             // Feistel substitution on left word
-            n = S[(l >> 24) & 0xff];
+            n = S[l >>> 24];
             n += S[0x100 | ((l >> 16) & 0xff)];
             n ^= S[0x200 | ((l >> 8) & 0xff)];
             n += S[0x300 | (l & 0xff)];
             r ^= n ^ P[++i];
 
             // Feistel substitution on right word
-            n = S[(r >> 24) & 0xff];
+            n = S[r >>> 24];
             n += S[0x100 | ((r >> 16) & 0xff)];
             n ^= S[0x200 | ((r >> 8) & 0xff)];
             n += S[0x300 | (r & 0xff)];
@@ -374,14 +374,14 @@
             l ^= P[0];
             for (j = 0; j <= BLOWFISH_NUM_ROUNDS - 2;) {
                 // Feistel substitution on left word
-                n = S[(l >> 24) & 0xff];
+                n = S[l >>> 24];
                 n += S[0x100 | ((l >> 16) & 0xff)];
                 n ^= S[0x200 | ((l >> 8) & 0xff)];
                 n += S[0x300 | (l & 0xff)];
                 r ^= n ^ P[++j];
 
                 // Feistel substitution on right word
-                n = S[(r >> 24) & 0xff];
+                n = S[r >>> 24];
                 n += S[0x100 | ((r >> 16) & 0xff)];
                 n ^= S[0x200 | ((r >> 8) & 0xff)];
                 n += S[0x300 | (r & 0xff)];
@@ -398,14 +398,14 @@
             l ^= P[0];
             for (j = 0; j <= BLOWFISH_NUM_ROUNDS - 2;) {
                 // Feistel substitution on left word
-                n = S[(l >> 24) & 0xff];
+                n = S[l >>> 24];
                 n += S[0x100 | ((l >> 16) & 0xff)];
                 n ^= S[0x200 | ((l >> 8) & 0xff)];
                 n += S[0x300 | (l & 0xff)];
                 r ^= n ^ P[++j];
 
                 // Feistel substitution on right word
-                n = S[(r >> 24) & 0xff];
+                n = S[r >>> 24];
                 n += S[0x100 | ((r >> 16) & 0xff)];
                 n ^= S[0x200 | ((r >> 8) & 0xff)];
                 n += S[0x300 | (r & 0xff)];
