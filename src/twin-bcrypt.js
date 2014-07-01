@@ -12,7 +12,7 @@
 
     "use strict";
 
-	// Default random number generator for vintage browsers (IE < 11)
+	// Default random number generator for IE<11
 	var cryptoRNG = false;
 	var randomBytes = function(numBytes) {
 		var bytes = [];
@@ -356,27 +356,17 @@
         return lr;
     }
 
-    function streamtoword(data, offp) {
-        var i;
-        var word = 0;
-        for (i = 0; i < 4; i++) {
-            word = (word << 8) | (data[offp] & 0xff);
-            offp = (offp + 1) % data.length;
-        }
-        return {key:word, offp:offp};
-    }
-
-    function expandKey(key, P, S) {
-        var i;
+    function expandKey(key, keyLength, P, S) {
+        var i, sw;
         var offp = 0;
         var lr = new Array(0x00000000, 0x00000000);
         var plen = P.length;
         var slen = S.length;
 
         for (i = 0; i < plen; i++) {
-            var sw = streamtoword(key, offp);
-            offp = sw.offp;
-            P[i] = P[i] ^ sw.key;
+            sw = key[offp++] << 24 | key[offp++] << 16 | key[offp++] << 8 | key[offp++];
+            offp %= keyLength;
+            P[i] ^= sw;
         }
         for (i = 0; i < plen; i += 2) {
             lr = encipher(lr, 0, P, S);
@@ -391,7 +381,7 @@
         }
     }
 
-    function ekskey(data, key, P, S) {
+    function ekskey(data, key, keyLength, P, S) {
         var i;
         var offp = 0;
         var lr = new Array(0x00000000, 0x00000000);
@@ -400,32 +390,32 @@
         var sw;
 
         for (i = 0; i < plen; i++) {
-            sw = streamtoword(key, offp);
-            offp = sw.offp;
-            P[i] = P[i] ^ sw.key;
+            sw = key[offp++] << 24 | key[offp++] << 16 | key[offp++] << 8 | key[offp++];
+            offp %= keyLength;
+            P[i] ^= sw;
         }
         offp = 0;
         for (i = 0; i < plen; i += 2) {
-            sw = streamtoword(data, offp);
-            offp = sw.offp;
-            lr[0] ^= sw.key;
+            sw = data[offp++] << 24 | data[offp++] << 16 | data[offp++] << 8 | data[offp++];
+            offp &= 0x0f;   // &0x0f === %BCRYPT_SALT_LEN
+            lr[0] ^= sw;
 
-            sw = streamtoword(data, offp);
-            offp = sw.offp;
-            lr[1] ^= sw.key;
+            sw = data[offp++] << 24 | data[offp++] << 16 | data[offp++] << 8 | data[offp++];
+            offp &= 0x0f;
+            lr[1] ^= sw;
 
             lr = encipher(lr, 0, P, S);
             P[i] = lr[0];
             P[i + 1] = lr[1];
         }
         for (i = 0; i < slen; i += 2) {
-            sw = streamtoword(data, offp);
-            offp = sw.offp;
-            lr[0] ^= sw.key;
+            sw = data[offp++] << 24 | data[offp++] << 16 | data[offp++] << 8 | data[offp++];
+            offp &= 0x0f;
+            lr[0] ^= sw;
 
-            sw = streamtoword(data, offp);
-            offp = sw.offp;
-            lr[1] ^= sw.key;
+            sw = data[offp++] << 24 | data[offp++] << 16 | data[offp++] << 8 | data[offp++];
+            offp &= 0x0f;
+            lr[1] ^= sw;
 
             lr = encipher(lr, 0, P, S);
             S[i] = lr[0];
@@ -446,12 +436,16 @@
         var P = P_orig.slice();
         var S = S_orig.slice();
 
-        ekskey(salt, password, P, S);
+        var passlen = password.length;
+        password[password.length] = password[0];
+        password[password.length] = password[1];
+        password[password.length] = password[2];
+        ekskey(salt, password, passlen, P, S);
 
         var start = new Date();
         for (var i = 0; i < rounds; i++) {
-            expandKey(password, P, S);
-            expandKey(salt, P, S);
+            expandKey(password, passlen, P, S);
+            expandKey(salt, BCRYPT_SALT_LEN, P, S);
             if (i % one_percent && progress) {
                 progress();
             }
