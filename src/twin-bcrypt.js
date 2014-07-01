@@ -358,12 +358,12 @@
         return lr;
     }
 
-    function expandKey(key, keyLength, LR, P, S) {
-        var i, sw;
+    function expandKey(key, keyLength, P, S) {
+        var i, j, n, sw;
         var offp = 0;
         var plen = P_LEN;
         var slen = S_LEN;
-        LR[0] = LR[1] = 0;
+        var l = 0, r = 0, t;
 
         for (i = 0; i < plen; i++) {
             sw = key[offp++] << 24 | key[offp++] << 16 | key[offp++] << 8 | key[offp++];
@@ -371,15 +371,51 @@
             P[i] ^= sw;
         }
         for (i = 0; i < plen; i += 2) {
-            LR = encipher(LR, 0, P, S);
-            P[i] = LR[0];
-            P[i + 1] = LR[1];
+            l ^= P[0];
+            for (j = 0; j <= BLOWFISH_NUM_ROUNDS - 2;) {
+                // Feistel substitution on left word
+                n = S[(l >> 24) & 0xff];
+                n += S[0x100 | ((l >> 16) & 0xff)];
+                n ^= S[0x200 | ((l >> 8) & 0xff)];
+                n += S[0x300 | (l & 0xff)];
+                r ^= n ^ P[++j];
+
+                // Feistel substitution on right word
+                n = S[(r >> 24) & 0xff];
+                n += S[0x100 | ((r >> 16) & 0xff)];
+                n ^= S[0x200 | ((r >> 8) & 0xff)];
+                n += S[0x300 | (r & 0xff)];
+                l ^= n ^ P[++j];
+            }
+            t = r ^ P[BLOWFISH_NUM_ROUNDS + 1];
+            r = l;
+            l = t;
+            P[i] = l;
+            P[i + 1] = r;
         }
 
         for (i = 0; i < slen; i += 2) {
-            LR = encipher(LR, 0, P, S);
-            S[i] = LR[0];
-            S[i + 1] = LR[1];
+            l ^= P[0];
+            for (j = 0; j <= BLOWFISH_NUM_ROUNDS - 2;) {
+                // Feistel substitution on left word
+                n = S[(l >> 24) & 0xff];
+                n += S[0x100 | ((l >> 16) & 0xff)];
+                n ^= S[0x200 | ((l >> 8) & 0xff)];
+                n += S[0x300 | (l & 0xff)];
+                r ^= n ^ P[++j];
+
+                // Feistel substitution on right word
+                n = S[(r >> 24) & 0xff];
+                n += S[0x100 | ((r >> 16) & 0xff)];
+                n ^= S[0x200 | ((r >> 8) & 0xff)];
+                n += S[0x300 | (r & 0xff)];
+                l ^= n ^ P[++j];
+            }
+            t = r ^ P[BLOWFISH_NUM_ROUNDS + 1];
+            r = l;
+            l = t;
+            S[i] = l;
+            S[i + 1] = r;
         }
     }
 
@@ -447,8 +483,8 @@
 
         var start = new Date();
         for (var i = 0; i < rounds; i++) {
-            expandKey(password, passlen, LR, P, S);
-            expandKey(salt, BCRYPT_SALT_LEN, LR, P, S);
+            expandKey(password, passlen, P, S);
+            expandKey(salt, BCRYPT_SALT_LEN, P, S);
             if (i % one_percent && progress) {
                 progress();
             }
