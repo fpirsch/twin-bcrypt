@@ -264,6 +264,8 @@
             0x7aaaf9b0, 0x4cf9aa7e, 0x1948c25c, 0x02fb8a8c, 0x01c36ae4,
             0xd6ebe1f9, 0x90d4f869, 0xa65cdea0, 0x3f09252d, 0xc208e69f,
             0xb74e6132, 0xce77e25b, 0x578fdfe3, 0x3ac372e6];
+    var P_LEN = P_orig.length,
+        S_LEN = S_orig.length;
     var bf_crypt_ciphertext = [0x4f727068, 0x65616e42, 0x65686f6c, 0x64657253,
             0x63727944, 0x6f756274];
 
@@ -356,12 +358,12 @@
         return lr;
     }
 
-    function expandKey(key, keyLength, P, S) {
+    function expandKey(key, keyLength, LR, P, S) {
         var i, sw;
         var offp = 0;
-        var lr = new Array(0x00000000, 0x00000000);
-        var plen = P.length;
-        var slen = S.length;
+        var plen = P_LEN;
+        var slen = S_LEN;
+        LR[0] = LR[1] = 0;
 
         for (i = 0; i < plen; i++) {
             sw = key[offp++] << 24 | key[offp++] << 16 | key[offp++] << 8 | key[offp++];
@@ -369,25 +371,25 @@
             P[i] ^= sw;
         }
         for (i = 0; i < plen; i += 2) {
-            lr = encipher(lr, 0, P, S);
-            P[i] = lr[0];
-            P[i + 1] = lr[1];
+            LR = encipher(LR, 0, P, S);
+            P[i] = LR[0];
+            P[i + 1] = LR[1];
         }
 
         for (i = 0; i < slen; i += 2) {
-            lr = encipher(lr, 0, P, S);
-            S[i] = lr[0];
-            S[i + 1] = lr[1];
+            LR = encipher(LR, 0, P, S);
+            S[i] = LR[0];
+            S[i + 1] = LR[1];
         }
     }
 
-    function ekskey(data, key, keyLength, P, S) {
+    function ekskey(data, key, keyLength, LR, P, S) {
         var i;
         var offp = 0;
-        var lr = new Array(0x00000000, 0x00000000);
-        var plen = P.length;
-        var slen = S.length;
+        var plen = P_LEN;
+        var slen = S_LEN;
         var sw;
+        LR[0] = LR[1] = 0;
 
         for (i = 0; i < plen; i++) {
             sw = key[offp++] << 24 | key[offp++] << 16 | key[offp++] << 8 | key[offp++];
@@ -398,28 +400,28 @@
         for (i = 0; i < plen; i += 2) {
             sw = data[offp++] << 24 | data[offp++] << 16 | data[offp++] << 8 | data[offp++];
             offp &= 0x0f;   // &0x0f === %BCRYPT_SALT_LEN
-            lr[0] ^= sw;
+            LR[0] ^= sw;
 
             sw = data[offp++] << 24 | data[offp++] << 16 | data[offp++] << 8 | data[offp++];
             offp &= 0x0f;
-            lr[1] ^= sw;
+            LR[1] ^= sw;
 
-            lr = encipher(lr, 0, P, S);
-            P[i] = lr[0];
-            P[i + 1] = lr[1];
+            LR = encipher(LR, 0, P, S);
+            P[i] = LR[0];
+            P[i + 1] = LR[1];
         }
         for (i = 0; i < slen; i += 2) {
             sw = data[offp++] << 24 | data[offp++] << 16 | data[offp++] << 8 | data[offp++];
             offp &= 0x0f;
-            lr[0] ^= sw;
+            LR[0] ^= sw;
 
             sw = data[offp++] << 24 | data[offp++] << 16 | data[offp++] << 8 | data[offp++];
             offp &= 0x0f;
-            lr[1] ^= sw;
+            LR[1] ^= sw;
 
-            lr = encipher(lr, 0, P, S);
-            S[i] = lr[0];
-            S[i + 1] = lr[1];
+            LR = encipher(LR, 0, P, S);
+            S[i] = LR[0];
+            S[i + 1] = LR[1];
         }
     }
 
@@ -433,6 +435,7 @@
         rounds = 1 << log_rounds;
         one_percent = Math.floor(rounds / 100) + 1;
 
+        var LR = new Array(0x00000000, 0x00000000);
         var P = P_orig.slice();
         var S = S_orig.slice();
 
@@ -440,12 +443,12 @@
         password[password.length] = password[0];
         password[password.length] = password[1];
         password[password.length] = password[2];
-        ekskey(salt, password, passlen, P, S);
+        ekskey(salt, password, passlen, LR, P, S);
 
         var start = new Date();
         for (var i = 0; i < rounds; i++) {
-            expandKey(password, passlen, P, S);
-            expandKey(salt, BCRYPT_SALT_LEN, P, S);
+            expandKey(password, passlen, LR, P, S);
+            expandKey(salt, BCRYPT_SALT_LEN, LR, P, S);
             if (i % one_percent && progress) {
                 progress();
             }
