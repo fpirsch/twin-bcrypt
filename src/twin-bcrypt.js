@@ -306,6 +306,15 @@
         return rs;
     }
 
+    function cycle72(a) {
+        var len = a.length, b = new Array(72), i = 0, j = 0;
+        while (j < 72) {
+            b[j++] = a[i++];
+            if (i === len) i = 0;
+        }
+        return b;
+    }
+
     /**
      * salt is a 22 character string from the alphabet
      * './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -358,7 +367,7 @@
         return lr;
     }
 
-    function expandKey(key, keyLength, P, S) {
+    function expandKey(key, P, S) {
         var i, j, n, sw;
         var offp = 0;
         var plen = P_LEN;
@@ -367,7 +376,6 @@
 
         for (i = 0; i < plen; i++) {
             sw = key[offp++] << 24 | key[offp++] << 16 | key[offp++] << 8 | key[offp++];
-            offp %= keyLength;
             P[i] ^= sw;
         }
         for (i = 0; i < plen; i += 2) {
@@ -419,7 +427,7 @@
         }
     }
 
-    function ekskey(data, key, keyLength, LR, P, S) {
+    function ekskey(data, key, LR, P, S) {
         var i;
         var offp = 0;
         var plen = P_LEN;
@@ -429,7 +437,6 @@
 
         for (i = 0; i < plen; i++) {
             sw = key[offp++] << 24 | key[offp++] << 16 | key[offp++] << 8 | key[offp++];
-            offp %= keyLength;
             P[i] ^= sw;
         }
         offp = 0;
@@ -475,16 +482,14 @@
         var P = P_orig.slice();
         var S = S_orig.slice();
 
-        var passlen = password.length;
-        password[password.length] = password[0];
-        password[password.length] = password[1];
-        password[password.length] = password[2];
-        ekskey(salt, password, passlen, LR, P, S);
+        password = cycle72(password);
+        salt = cycle72(salt);
+        ekskey(salt, password, LR, P, S);
 
         var start = new Date();
         for (var i = 0; i < rounds; i++) {
-            expandKey(password, passlen, P, S);
-            expandKey(salt, BCRYPT_SALT_LEN, P, S);
+            expandKey(password, P, S);
+            expandKey(salt, P, S);
             if (i % one_percent && progress) {
                 progress();
             }
