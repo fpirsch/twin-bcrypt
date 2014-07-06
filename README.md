@@ -5,9 +5,6 @@ Pure JS implementation of the [BCrypt](https://en.wikipedia.org/wiki/Bcrypt) alg
 See the htpasswpd generator at http://aspirine.org/htpasswd_en.html for a live demo.
 
 
-*Note:* some of the tests still fail. That's how [BDD](https://en.wikipedia.org/wiki/Behavior-driven_development) works. Think of those failing tests not as flaws but as a TODO list : the initial project had a number of weaknesses and that's the point of creating twin-bcrypt.
-
-
 ## Basic usage:
 Synchronous
 ```
