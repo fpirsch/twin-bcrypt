@@ -62,6 +62,10 @@ Though you can use your custom salt and there is no need for salts to be persist
         * `result` - Second parameter to the callback providing whether the data and encrypted forms match [true | false].
 
 
+## Character encoding
+In order to provide support for unicode strings, passwords with non-ascii characters are utf-8 encoded before being hashed.
+
+
 ## About prefixes
 Back in the old days when all bcrypt-hashed passwords had the `$2a$` prefix, a bug was discovered in the crypt_blowfish implementation of this algorithm.
 A small fraction of the `$2a$` passwords were buggy, but most of them were just fine. It was then decided to
