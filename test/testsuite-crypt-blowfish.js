@@ -19,6 +19,8 @@ describe('crypt_blowfish test suite', function() {
     // Twin-bcrypt's original C implementation never had this bug, so none of the $2x$ tests apply, and some of the
     // $2a$ don't either. All the $2y$ prefix tests should pass, though.
     it('should handle $2a$ and $2y$ prefixes', function() {
+        TwinBcrypt.encodingMode = TwinBcrypt.ENCODING_RAW;
+
         //TwinBcrypt.compareSync("\xa3", "$2x$05$/OK.fbVrR/bpIqNJ5ianF.CE5elHaaO4EbggVDjb8P19RukzXSM3e").should.be.true;
 
         // Buggy $2x$ and $2a$
@@ -48,6 +50,7 @@ describe('crypt_blowfish test suite', function() {
         TwinBcrypt.compareSync("\xaa".repeat(72) + "chars after 72 are ignored as usual", "$2a$05$/OK.fbVrR/bpIqNJ5ianF.swQOIzjOiJ9GHEPuhEkvqrUyvWhEMx6").should.be.true;
         TwinBcrypt.compareSync("\xaa\x55".repeat(36), "$2a$05$/OK.fbVrR/bpIqNJ5ianF.R9xrDjiycxMbQE2bp.vgqlYpW5wx2yy").should.be.true;
         TwinBcrypt.compareSync("\x55\xaa\xff".repeat(24), "$2a$05$/OK.fbVrR/bpIqNJ5ianF.9tQZzcJfm3uj2NvJ/n5xkhpqLrMpWCe").should.be.true;
+        TwinBcrypt.encodingMode = TwinBcrypt.ENCODING_UTF8;
     });
 
     it('should hash an empty password', function() {

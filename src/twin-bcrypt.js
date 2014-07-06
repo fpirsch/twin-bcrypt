@@ -12,6 +12,7 @@
 
     "use strict";
 
+
 	// Default random number generator for IE<11
 	var cryptoRNG = false;
 	var randomBytes = function(numBytes) {
@@ -534,7 +535,8 @@
         var real_salt = salt.substr(7, 22);
         password += '\x00';
 
-        var passwordb = string2rawBytes(password);
+        var passwordb = (exports.encodingMode === exports.ENCODING_UTF8) ?
+            string2utf8Bytes(password) : string2rawBytes(password);
         var saltb = decode_base64(real_salt, BCRYPT_SALT_LEN);
         var hashed = crypt_raw(passwordb, saltb, rounds, progress);
 
@@ -658,7 +660,12 @@
     exports.compareSync = compareSync;
     exports.compare = compare;
 
-	exports.cryptoRNG = cryptoRNG;
+    // 8-bit encoding mode: utf8 or raw.
+    exports.ENCODING_UTF8 = 0;
+    exports.ENCODING_RAW = 1;
+    exports.encodingMode = exports.ENCODING_UTF8;
+
+    exports.cryptoRNG = cryptoRNG;
     exports.randomBytes = randomBytes;
     exports.defaultCost = GENSALT_DEFAULT_LOG2_ROUNDS;
 	exports.version = "0.0.1-alpha";

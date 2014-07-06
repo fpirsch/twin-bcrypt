@@ -60,10 +60,17 @@ Though you can use your custom salt and there is no need for salts to be persist
     * `callback` - [REQUIRED] - a callback to be fired once the data has been compared.
         * `error` - First parameter to the callback detailing any errors.
         * `result` - Second parameter to the callback providing whether the data and encrypted forms match [true | false].
+* `encodingMode`
+    * `ENCODING_UTF8` (default) - encodes non-ascii characters to utf-8 before hashing.
+    * `ENCODING_RAW` - does not encode non-ascii characters in the password. This allows the use of custom encodings.
 
 
 ## Character encoding
-In order to provide support for unicode strings, passwords with non-ascii characters are utf-8 encoded before being hashed.
+In order to provide support for unicode strings, passwords with non-ascii characters are utf-8 encoded by default before being hashed.
+If a different encoding is desired, the password should be encoded before handing it to TwinBcrypt, and the following option should
+be used :
+
+`TwinBcrypt.encodingMode = TwinBcrypt.ENCODING_RAW;`
 
 
 ## About prefixes
