@@ -35,6 +35,7 @@ TwinBcrypt.compare("veggies", hash, function(err, res) {
 In the above examples, the salt is automatically generated and attached to the hash.
 Though you can use your custom salt and there is no need for salts to be persisted as it will always be included in the final hash result and can be retrieved.
 
+
 ## API
 * `genSalt(cost)`
     * `cost` - [OPTIONAL] - Default 10. This value is logarithmic, the actual number of iterations used will be 2<sup>cost</sup> : increasing the cost by 1 will double the amount of time taken.
@@ -59,6 +60,19 @@ Though you can use your custom salt and there is no need for salts to be persist
     * `callback` - [REQUIRED] - a callback to be fired once the data has been compared.
         * `error` - First parameter to the callback detailing any errors.
         * `result` - Second parameter to the callback providing whether the data and encrypted forms match [true | false].
+
+
+## About prefixes
+Back in the old days when all bcrypt-hashed passwords had the `$2a$` prefix, a bug was discovered in the crypt_blowfish implementation of this algorithm.
+A small fraction of the `$2a$` passwords were buggy, but most of them were just fine. It was then decided to
+[create two new prefixes](http://www.openwall.com/lists/oss-security/2011/06/21/16) to distinguish between them :
+
+  * 2a - unknown correctness (may be correct, may be buggy)
+  * 2x - sign extension bug
+  * 2y - definitely correct
+
+Twin-bcrypt uses the `$2y$` prefix by default, and can check correct `$2a$` passwords.
+However it does not emulate the sign extension bug of old crypt_blowfish implementations, and thus doesn't recognize the legacy `$2x$` prefix.
 
 
 ## Credits

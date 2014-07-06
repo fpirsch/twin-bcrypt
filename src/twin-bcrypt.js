@@ -49,6 +49,15 @@
         return bytes;
 	}
 
+	function string2rawBytes(s) {
+        var len = s.length,
+            bytes = new Array(len);
+        for(var i = 0; i < len; i++) {
+            bytes[i] = s.charCodeAt(i);
+        }
+        return bytes;
+	}
+
     var BCRYPT_SALT_LEN = 16;
 
     var GENSALT_DEFAULT_LOG2_ROUNDS = 10;
@@ -523,13 +532,13 @@
     function hashpw(password, salt, progress) {
         var rounds = +salt.substr(4, 2);
         var real_salt = salt.substr(7, 22);
-        password += '\x00';     // not for $2$ passwords
+        password += '\x00';
 
-        var passwordb = string2utf8Bytes(password);
+        var passwordb = string2rawBytes(password);
         var saltb = decode_base64(real_salt, BCRYPT_SALT_LEN);
         var hashed = crypt_raw(passwordb, saltb, rounds, progress);
 
-        var rs = '$2a$';
+        var rs = '$2' + salt.charAt(2) + '$';
         if (rounds < 10) rs += '0';
         rs += rounds + '$' + encode_base64(saltb, BCRYPT_SALT_LEN);
         // This has to be bug-compatible with the original implementation, so only encode 23 of the 24 bytes.
@@ -546,14 +555,14 @@
         if (isNaN(cost) || cost < 4 || cost > 31) {
             throw new Error('Invalid cost parameter.');
         }
-        var output = '$2a$';
+        var output = '$2y$';
         if (cost < 10) output += '0';
         output += cost + '$';
         output += encode_base64(randomBytes(BCRYPT_SALT_LEN), BCRYPT_SALT_LEN);
         return output;
     }
 
-    var SALT_PATTERN = /^\$2a\$(0[4-9]|[12][0-9]|3[01])\$[.\/A-Za-z0-9]{21}[.Oeu]/;
+    var SALT_PATTERN = /^\$2[ay]\$(0[4-9]|[12][0-9]|3[01])\$[.\/A-Za-z0-9]{21}[.Oeu]/;
 
     function hashSync(data, salt) {
         /*
@@ -601,7 +610,7 @@
     }
 
 
-    var HASH_PATTERN = /^\$2a\$(0[4-9]|[12][0-9]|3[01])\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/;
+    var HASH_PATTERN = /^\$2[ay]\$(0[4-9]|[12][0-9]|3[01])\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/;
 
     function compareSync(password, refhash) {
         /*

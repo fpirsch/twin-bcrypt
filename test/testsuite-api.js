@@ -17,18 +17,18 @@ function Spy() {
 
 describe('API test suite', function() {
 
-    var SALT4 = '$2a$04$......................',
-        SALT7 = '$2a$07$......................',
-        HASH4 = '$2a$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm',
-        HASH7 = '$2a$07$......................rkNUWThr5KSHevvQDxRDSYaalST.SGy',
-        COST_4_HASH = /^\$2a\$04\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/,
-        COST_7_HASH = /^\$2a\$07\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/,
-        DEFAULT_HASH = new RegExp('^\\$2a\\$'+TwinBcrypt.defaultCost+'\\$[./A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$'),
+    var SALT4 = '$2y$04$......................',
+        SALT7 = '$2y$07$......................',
+        HASH4 = '$2y$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm',
+        HASH7 = '$2y$07$......................rkNUWThr5KSHevvQDxRDSYaalST.SGy',
+        COST_4_HASH = /^\$2y\$04\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/,
+        COST_7_HASH = /^\$2y\$07\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/,
+        DEFAULT_HASH = new RegExp('^\\$2y\\$'+TwinBcrypt.defaultCost+'\\$[./A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$'),
         noop = function() {};
 
     describe('Salt', function() {
-        var COST_4_SALT = /^\$2a\$04\$[.\/A-Za-z0-9]{21}[.Oeu]$/;
-        var DEFAULT_SALT = new RegExp('^\\$2a\\$'+TwinBcrypt.defaultCost+'\\$[./A-Za-z0-9]{21}[.Oeu]$');
+        var COST_4_SALT = /^\$2y\$04\$[.\/A-Za-z0-9]{21}[.Oeu]$/;
+        var DEFAULT_SALT = new RegExp('^\\$2y\\$'+TwinBcrypt.defaultCost+'\\$[./A-Za-z0-9]{21}[.Oeu]$');
 
         it('should have a decent default cost parameter', function() {
             TwinBcrypt.defaultCost.should.be.within(10, 15);
@@ -61,7 +61,7 @@ describe('API test suite', function() {
 
             it('should be generated with explicit salt', function() {
                 TwinBcrypt.hashSync('password', SALT4).should.equal(HASH4);
-                TwinBcrypt.hashSync('', SALT4).should.equal('$2a$04$......................w74bL5gU7LSJClZClCa.Pkz14aTv/XO');
+                TwinBcrypt.hashSync('', SALT4).should.equal('$2y$04$......................w74bL5gU7LSJClZClCa.Pkz14aTv/XO');
             });
 
             it('should be generated with salt given as a number', function() {
@@ -75,10 +75,10 @@ describe('API test suite', function() {
             });
 
             it('should reject bad salts', function() {
-                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.....é................'); }).to.throw(Error, /salt/);
-                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.............-........'); }).to.throw(Error, /salt/);
-                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.....................'); }).to.throw(Error, /salt/);
-                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.....................A'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2y$04$.....é................'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2y$04$.............-........'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2y$04$.....................'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2y$04$.....................A'); }).to.throw(Error, /salt/);
             });
 
         });
@@ -102,10 +102,10 @@ describe('API test suite', function() {
             });
 
             it('should reject bad salts', function() {
-                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.....é................'); }).to.throw(Error, /salt/);
-                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.............-........'); }).to.throw(Error, /salt/);
-                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.....................'); }).to.throw(Error, /salt/);
-                expect(function() { TwinBcrypt.hashSync('password', '$2a$04$.....................A'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2y$04$.....é................'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2y$04$.............-........'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2y$04$.....................'); }).to.throw(Error, /salt/);
+                expect(function() { TwinBcrypt.hashSync('password', '$2y$04$.....................A'); }).to.throw(Error, /salt/);
             });
 
             it('should accept (password, callback)', function(done) {
@@ -167,10 +167,10 @@ describe('API test suite', function() {
 
 
     describe('Compare', function() {
-        var SALT4 = '$2a$04$......................',
-            SALT7 = '$2a$07$......................',
-            HASH4 = '$2a$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm',
-            HASH7 = '$2a$07$......................rkNUWThr5KSHevvQDxRDSYaalST.SGy',
+        var SALT4 = '$2y$04$......................',
+            SALT7 = '$2y$07$......................',
+            HASH4 = '$2y$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm',
+            HASH7 = '$2y$07$......................rkNUWThr5KSHevvQDxRDSYaalST.SGy',
             COST_4_HASH = /^\$2a\$04\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/,
             COST_7_HASH = /^\$2a\$07\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/,
             DEFAULT_HASH = new RegExp('^\\$2a\\$'+TwinBcrypt.defaultCost+'\\$[./A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$'),
@@ -182,10 +182,10 @@ describe('API test suite', function() {
                 expect(function() { TwinBcrypt.compareSync('password'); }).to.throw(Error, /data|argument/);
                 expect(function() { TwinBcrypt.compareSync('password', 4); }).to.throw(Error, /data|argument/);
                 expect(function() {
-                    TwinBcrypt.compareSync('password', '$2a$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5QdjhmA');
+                    TwinBcrypt.compareSync('password', '$2y$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5QdjhmA');
                 }).to.throw(Error, /data|argument/);
                 expect(function() {
-                    TwinBcrypt.compareSync('password', '$2a$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjh');
+                    TwinBcrypt.compareSync('password', '$2y$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjh');
                 }).to.throw(Error, /data|argument/);
                 expect(function() {
                     TwinBcrypt.compareSync('password', '$2a!04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm').to.be.false;
@@ -197,7 +197,7 @@ describe('API test suite', function() {
                     TwinBcrypt.compareSync('password', '$3a$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm').to.be.false;
                 }).to.throw(Error, /data|argument/);
                 expect(function() {
-                    TwinBcrypt.compareSync('password', '$2a$K4$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm').to.be.false;
+                    TwinBcrypt.compareSync('password', '$2y$K4$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm').to.be.false;
                 }).to.throw(Error, /data|argument/);
             });
 
@@ -217,7 +217,7 @@ describe('API test suite', function() {
                 expect(function() { TwinBcrypt.compare('password'); }).to.throw(Error, /data|argument|callback/);
                 expect(function() { TwinBcrypt.compare('password', 4); }).to.throw(Error, /data|argument/);
                 expect(function() {
-                    TwinBcrypt.compare('password', '$2a$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5QdjhmA', noop);
+                    TwinBcrypt.compare('password', '$2y$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5QdjhmA', noop);
                 }).to.throw(Error, /data|argument/);
                 expect(function() { TwinBcrypt.compare('password', HASH4); }).to.throw(Error, /argument|callback/);
                 expect(function() { TwinBcrypt.compare('password', noop); }).to.throw(Error, /argument|callback/);
