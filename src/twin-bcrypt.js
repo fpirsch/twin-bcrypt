@@ -531,18 +531,18 @@
      * progress, if present, must be a function.
      */
     function hashpw(password, salt, progress) {
-        var rounds = +salt.substr(4, 2);
+        var log_rounds = +salt.substr(4, 2);
         var real_salt = salt.substr(7, 22);
         password += '\x00';
 
         var passwordb = (exports.encodingMode === exports.ENCODING_UTF8) ?
             string2utf8Bytes(password) : string2rawBytes(password);
         var saltb = decode_base64(real_salt, BCRYPT_SALT_LEN);
-        var hashed = crypt_raw(passwordb, saltb, rounds, progress);
+        var hashed = crypt_raw(passwordb, saltb, log_rounds, progress);
 
         var rs = '$2' + salt.charAt(2) + '$';
-        if (rounds < 10) rs += '0';
-        rs += rounds + '$' + encode_base64(saltb, BCRYPT_SALT_LEN);
+        if (log_rounds < 10) rs += '0';
+        rs += log_rounds + '$' + encode_base64(saltb, BCRYPT_SALT_LEN);
         // This has to be bug-compatible with the original implementation, so only encode 23 of the 24 bytes.
         rs += encode_base64(hashed, 23);
         return rs;
