@@ -478,11 +478,26 @@
         }
     }
 
+    function encryptECB(P, S) {
+        var cdata = bf_crypt_ciphertext.slice();
+        var i, j, clen = cdata.length;
+        for (i = 0; i < 64; i++) {
+            for (j = 0; j < clen; j += 2) {
+                encipher(cdata, j, P, S);
+            }
+        }
+        var ret = new Array(clen * 4);
+        for (i = 0, j = 0; i < clen; i++) {
+            ret[j++] = cdata[i] >> 24;
+            ret[j++] = (cdata[i] >> 16 & 0xff);
+            ret[j++] = (cdata[i] >> 8 & 0xff);
+            ret[j++] = cdata[i] & 0xff;
+        }
+        return ret;
+    }
+
     function crypt_raw(password, salt, log_rounds, progress) {
         var rounds;
-        var j;
-        var cdata = bf_crypt_ciphertext.slice();
-        var clen = cdata.length;
         var one_percent;
 
         rounds = 1 << log_rounds;
@@ -503,25 +518,9 @@
             if (i % one_percent && progress) {
                 progress();
             }
-            // TODO bug here
-            //if (new Date() - start > MAX_EXECUTION_TIME) {
-                //break;
-            //}
         }
 
-        for (i = 0; i < 64; i++) {
-            for (j = 0; j < (clen >> 1); j++) {
-                encipher(cdata, j << 1, P, S);
-            }
-        }
-        var ret = [];
-        for (i = 0; i < clen; i++) {
-            ret.push((cdata[i] >> 24) & 0xff);
-            ret.push((cdata[i] >> 16) & 0xff);
-            ret.push((cdata[i] >> 8) & 0xff);
-            ret.push(cdata[i] & 0xff);
-        }
-        return ret;
+        return encryptECB(P, S);
     }
 
 
