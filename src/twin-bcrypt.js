@@ -478,7 +478,27 @@
         }
     }
 
-    function encryptECB(P, S) {
+    function eksBlowfishSetup(password, salt, P, S, counterStart, counterEnd, limit, progress, callback) {
+        var i = counterStart,
+            j = 0;
+        while(i <= counterEnd && j <= limit) {
+            expandKey(password, P, S);
+            expandKey(salt, P, S);
+            i++;
+            j++;
+        }
+
+        if (progress) progress();
+
+        if (i <= counterEnd) {
+            setImmediate(eksBlowfishSetup.bind(null, password, salt, P, S, i, counterEnd, limit, progress, callback));
+        }
+        else {
+            setImmediate(encryptECB.bind(null, P, S, callback));
+        }
+    }
+
+    function encryptECB(P, S, callback) {
         var cdata = bf_crypt_ciphertext.slice();
         var i, j, clen = cdata.length;
         for (i = 0; i < 64; i++) {
@@ -493,58 +513,54 @@
             ret[j++] = (cdata[i] >> 8 & 0xff);
             ret[j++] = cdata[i] & 0xff;
         }
+        if (callback) {
+            callback(ret);
+        }
         return ret;
     }
 
-    function crypt_raw(password, salt, log_rounds, progress) {
-        var rounds;
-        var one_percent;
-
-        rounds = 1 << log_rounds;
-        one_percent = Math.floor(rounds / 100) + 1;
-
-        var LR = new Array(0x00000000, 0x00000000);
-        var P = P_orig.slice();
-        var S = S_orig.slice();
-
-        password = cycle72(password);
-        salt = cycle72(salt);
-        ekskey(salt, password, LR, P, S);
-
-        var start = new Date();
-        for (var i = 0; i < rounds; i++) {
-            expandKey(password, P, S);
-            expandKey(salt, P, S);
-            if (i % one_percent && progress) {
-                progress();
-            }
-        }
-
-        return encryptECB(P, S);
+    function format(prefix, hashed) {
+        // This has to be bug-compatible with the original implementation, so only encode 23 of the 24 bytes.
+        return prefix + encode_base64(hashed, 23);
     }
-
 
     /**
      * password must be a string
      * salt must be a valid string
-     * progress, if present, must be a function.
+     * progress and callback, if present, must be functions.
      */
-    function hashpw(password, salt, progress) {
-        var log_rounds = +salt.substr(4, 2);
-        var real_salt = salt.substr(7, 22);
+    function hashpw(password, salt, progress, callback) {
+        var prefix = salt.substr(0, 1 + 2 + 1 + 2 + 1 + 22),    // 29
+            log_rounds = +salt.substr(4, 2),
+            real_salt = salt.substr(7, 22);
         password += '\x00';
 
         var passwordb = (exports.encodingMode === exports.ENCODING_UTF8) ?
             string2utf8Bytes(password) : string2rawBytes(password);
         var saltb = decode_base64(real_salt, BCRYPT_SALT_LEN);
-        var hashed = crypt_raw(passwordb, saltb, log_rounds, progress);
 
-        var rs = '$2' + salt.charAt(2) + '$';
-        if (log_rounds < 10) rs += '0';
-        rs += log_rounds + '$' + encode_base64(saltb, BCRYPT_SALT_LEN);
-        // This has to be bug-compatible with the original implementation, so only encode 23 of the 24 bytes.
-        rs += encode_base64(hashed, 23);
-        return rs;
+        var rounds = 1 << log_rounds;
+        var counterEnd = rounds -1,
+            limit = counterEnd,
+            LR = new Array(0x00000000, 0x00000000),
+            P = P_orig.slice(),
+            S = S_orig.slice();
+
+        passwordb = cycle72(passwordb);
+        saltb = cycle72(saltb);
+
+        ekskey(saltb, passwordb, LR, P, S);
+
+        if (callback) {
+            if (progress) limit = 128;
+            eksBlowfishSetup(passwordb, saltb, P, S, 0, counterEnd, limit, progress, function(result) {
+                callback(null, format(prefix, result));
+            });
+        }
+        else {
+            eksBlowfishSetup(passwordb, saltb, P, S, 0, counterEnd, limit);
+            return format(prefix, encryptECB(P, S));
+        }
     }
 
     function genSalt(cost) {
@@ -592,6 +608,7 @@
         }
         else if (arguments.length === 3) {
             callback = progress;
+            progress = null;
             if (typeof salt === 'function') {
                 progress = salt;
                 salt = null;
@@ -602,12 +619,8 @@
         if (!callback || typeof callback !== 'function') {
             throw new Error('No callback function was given.');
         }
-        setImmediate(function() {
-            var result = null;
-            var error = null;
-            result = hashpw(data, salt, progress);
-            callback(error, result);
-        });
+
+        hashpw(data, salt, progress, callback);
     }
 
 

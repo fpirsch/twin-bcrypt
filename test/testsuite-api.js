@@ -8,15 +8,12 @@
 function Spy() {
     var count = 0;
     var sp = function() { count++; };
-    var called = function() { count.should.be.above(1); };
+    var called = function() { count.should.be.at.least(1); };
     sp.should = { have: { been: { called: called } } };
     return sp;
 }
 
-
-
 describe('API test suite', function() {
-
     var SALT4 = '$2y$04$......................',
         SALT7 = '$2y$07$......................',
         HASH4 = '$2y$04$......................LAtw7/ohmmBAhnXqmkuIz83Rl5Qdjhm',
@@ -117,9 +114,10 @@ describe('API test suite', function() {
             });
 
             it('should accept (password, string_salt, callback)', function(done) {
-                TwinBcrypt.hash('password', SALT4, function(error, result) {
+                // Use SALT7 instead of SALT4 to check that done() is not called multiple times.
+                TwinBcrypt.hash('password', SALT7, function(error, result) {
                     expect(error).to.not.exist;
-                    result.should.equal(HASH4);
+                    result.should.equal(HASH7);
                     done();
                 });
             });
@@ -234,7 +232,7 @@ describe('API test suite', function() {
                 });
             });
 
-            it('should accept (password, hash, callback) with a wrong password', function(done) {
+            it('should return false but not throw when called with (wrong password, hash, callback)', function(done) {
                 TwinBcrypt.compare('wrong', HASH4, function(error, result) {
                     expect(error).to.not.exist;
                     result.should.be.false;
