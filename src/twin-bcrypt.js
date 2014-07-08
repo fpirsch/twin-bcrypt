@@ -488,7 +488,10 @@
             j++;
         }
 
-        if (progress) progress();
+        if (progress) {
+            var result = progress(i / (counterEnd+1));
+            if (result === false) return;
+        }
 
         if (i <= counterEnd) {
             setImmediate(eksBlowfishSetup.bind(null, password, salt, P, S, i, counterEnd, limit, progress, callback));
@@ -552,7 +555,7 @@
         ekskey(saltb, passwordb, LR, P, S);
 
         if (callback) {
-            if (progress) limit = 128;
+            if (progress) limit = 127;
             eksBlowfishSetup(passwordb, saltb, P, S, 0, counterEnd, limit, progress, function(result) {
                 callback(null, format(prefix, result));
             });
