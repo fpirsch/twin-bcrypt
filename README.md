@@ -35,18 +35,17 @@ Though you can use your custom salt and there is no need for salts to be persist
 
 ## API
 * `genSalt(cost)`
-    * `cost` - [OPTIONAL] - Default 10. This value is logarithmic, the actual number of iterations used will be 2<sup>cost</sup> : increasing the cost by 1 will double the amount of time taken.
+    * `cost` - [OPTIONAL] - Integer between 4 and 31 inclusive. Default 10. This value is logarithmic, the actual number of iterations used will be 2<sup>cost</sup> : increasing the cost by 1 will double the amount of time taken.
 * `hashSync(data, salt)`
     * `data` - [REQUIRED] - the data to be encrypted.
     * `salt` - [OPTIONAL] - the salt to be used in encryption. If specified as a number then a salt will be generated and used.
 * `hash(data, salt, progress, cb)`
     * `data` - [REQUIRED] - the data to be encrypted.
     * `salt` - [OPTIONAL] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used.
-    * `progress` - [OPTIONAL] - a callback to be called during the hash calculation to signify progress
+    * `progress` - [OPTIONAL] - a callback to be invoked during the hash calculation to signify progress.
         * `p` - Value between 0 (exclusive) and 1 (inclusive), sent as a parameter to the progress callback.
     * `callback` - [REQUIRED] - a callback to be fired once the data has been encrypted.
-        * `error` - First parameter to the callback detailing any errors.
-        * `result` - Second parameter to the callback providing the encrypted form.
+        * `result` - Hashed data received as an argument.
 * `compareSync(password, refhash)`
     * `password` - [REQUIRED] - password to check.
     * `refhash` - [REQUIRED] - reference hash to check the password against.
@@ -57,8 +56,7 @@ Though you can use your custom salt and there is no need for salts to be persist
     * `progress` - [OPTIONAL] - a callback to be called during the hash verification to signify progress
         * `p` - Value between 0 (exclusive) and 1 (inclusive), sent as a parameter to the progress callback.
     * `callback` - [REQUIRED] - a callback to be fired once the data has been compared.
-        * `error` - First parameter to the callback detailing any errors.
-        * `result` - Second parameter to the callback providing whether the data and encrypted forms match [true | false].
+        * `result` - Boolean received as an argument to the callback, indicating whether the data and encrypted forms match.
 * `encodingMode`
     * `ENCODING_UTF8` (default) - encodes non-ascii characters to utf-8 before hashing.
     * `ENCODING_RAW` - does not encode non-ascii characters in the password. This allows the use of custom encodings.
