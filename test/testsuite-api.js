@@ -1,15 +1,35 @@
 /* jshint expr: true */
-/* global chai, describe, it, expect, TwinBcrypt */
+/* global chai, describe, it, expect, TwinBcrypt, setTimeout */
 
 /**
  * A trivial spy function.
  * Also check https://github.com/chaijs/chai-spies
  */
-function Spy() {
-    var count = 0;
-    var sp = function() { count++; };
-    var called = function() { count.should.be.at.least(1); };
-    sp.should = { have: { been: { called: called } } };
+function Spy(func) {
+    var count = 0, values = [];
+
+    function sp(n) {
+        count++;
+        values.push(n);
+        if (func) return func(n);
+    }
+
+    // Could be more expressive.
+    // But it is essential to keep this as simple as possible.
+    sp.should = {
+        not: { have: { been: {
+            called: function() { count.should.equal(0); }
+        } } },
+        have: { been: { called: {
+            once: function() { count.should.equal(1); },
+            at: { least : {
+                once: function() { count.should.be.at.least(1); },
+                twice: function() { count.should.be.at.least(2); },
+            } }
+        } } }
+    };
+    sp.lastValue = function() { return values[values.length-1]; };
+    sp.penultimateValue = function() { return values[values.length-2]; };
     return sp;
 }
 
@@ -131,16 +151,31 @@ describe('API test suite', function() {
                 var spy = Spy();
                 TwinBcrypt.hash('password', spy, function(result) {
                     result.should.match(DEFAULT_HASH);
-                    spy.should.have.been.called();
+                    spy.should.have.been.called.at.least.twice();
+                    spy.penultimateValue().should.be.below(1);
+                    spy.lastValue().should.equal(1);
                     done();
                 });
             });
 
+            it('should be able to stop the process', function(done) {
+                var progressSpy = Spy(function(p) { return false; });
+                var callbackSpy = Spy();
+                TwinBcrypt.hash('password', progressSpy, callbackSpy);
+                setTimeout(function() {
+                    callbackSpy.should.not.have.been.called();
+                    progressSpy.should.have.been.called.once();
+                    progressSpy.lastValue().should.be.below(1);
+                    done();
+                }, 400);
+            });
+
             it('should accept (password, string_salt, progress, callback)', function(done) {
                 var spy = Spy();
-                TwinBcrypt.hash('password', SALT7, spy, function(result) {
-                    result.should.equal(HASH7);
-                    spy.should.have.been.called();
+                TwinBcrypt.hash('password', SALT4, spy, function(result) {
+                    result.should.equal(HASH4);
+                    spy.should.have.been.called.at.least.once();
+                    spy.lastValue().should.equal(1);
                     done();
                 });
             });
@@ -149,7 +184,7 @@ describe('API test suite', function() {
                 var spy = Spy();
                 TwinBcrypt.hash('password', 7, spy, function(result) {
                     result.should.match(COST_7_HASH);
-                    spy.should.have.been.called();
+                    spy.should.have.been.called.at.least.once();
                     done();
                 });
             });
@@ -236,7 +271,7 @@ describe('API test suite', function() {
                 var spy = Spy();
                 TwinBcrypt.compare('password', HASH7, spy, function(result) {
                     result.should.be.true;
-                    spy.should.have.been.called();
+                    spy.should.have.been.called.at.least.once();
                     done();
                 });
             });
