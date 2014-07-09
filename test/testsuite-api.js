@@ -106,8 +106,7 @@ describe('API test suite', function() {
             });
 
             it('should accept (password, callback)', function(done) {
-                TwinBcrypt.hash('password', function(error, result) {
-                    expect(error).to.not.exist;
+                TwinBcrypt.hash('password', function(result) {
                     result.should.match(DEFAULT_HASH);
                     done();
                 });
@@ -115,16 +114,14 @@ describe('API test suite', function() {
 
             it('should accept (password, string_salt, callback)', function(done) {
                 // Use SALT7 instead of SALT4 to check that done() is not called multiple times.
-                TwinBcrypt.hash('password', SALT7, function(error, result) {
-                    expect(error).to.not.exist;
+                TwinBcrypt.hash('password', SALT7, function(result) {
                     result.should.equal(HASH7);
                     done();
                 });
             });
             
             it('should accept (password, number_salt, callback)', function(done) {
-                TwinBcrypt.hash('password', 4, function(error, result) {
-                    expect(error).to.not.exist;
+                TwinBcrypt.hash('password', 4, function(result) {
                     result.should.match(COST_4_HASH);
                     done();
                 });
@@ -132,8 +129,7 @@ describe('API test suite', function() {
 
             it('should accept (password, progress, callback)', function(done) {
                 var spy = Spy();
-                TwinBcrypt.hash('password', spy, function(error, result) {
-                    expect(error).to.not.exist;
+                TwinBcrypt.hash('password', spy, function(result) {
                     result.should.match(DEFAULT_HASH);
                     spy.should.have.been.called();
                     done();
@@ -142,8 +138,7 @@ describe('API test suite', function() {
 
             it('should accept (password, string_salt, progress, callback)', function(done) {
                 var spy = Spy();
-                TwinBcrypt.hash('password', SALT7, spy, function(error, result) {
-                    expect(error).to.not.exist;
+                TwinBcrypt.hash('password', SALT7, spy, function(result) {
                     result.should.equal(HASH7);
                     spy.should.have.been.called();
                     done();
@@ -152,8 +147,7 @@ describe('API test suite', function() {
 
             it('should accept (password, number_salt, progress, callback)', function(done) {
                 var spy = Spy();
-                TwinBcrypt.hash('password', 7, spy, function(error, result) {
-                    expect(error).to.not.exist;
+                TwinBcrypt.hash('password', 7, spy, function(result) {
                     result.should.match(COST_7_HASH);
                     spy.should.have.been.called();
                     done();
@@ -225,16 +219,14 @@ describe('API test suite', function() {
             });
 
             it('should accept (password, hash, callback)', function(done) {
-                TwinBcrypt.compare('password', HASH4, function(error, result) {
-                    expect(error).to.not.exist;
+                TwinBcrypt.compare('password', HASH4, function(result) {
                     result.should.be.true;
                     done();
                 });
             });
 
             it('should return false but not throw when called with (wrong password, hash, callback)', function(done) {
-                TwinBcrypt.compare('wrong', HASH4, function(error, result) {
-                    expect(error).to.not.exist;
+                TwinBcrypt.compare('wrong', HASH4, function(result) {
                     result.should.be.false;
                     done();
                 });
@@ -242,8 +234,7 @@ describe('API test suite', function() {
 
             it('should accept (password, hash, progress, callback)', function(done) {
                 var spy = Spy();
-                TwinBcrypt.compare('password', HASH7, spy, function(error, result) {
-                    expect(error).to.not.exist;
+                TwinBcrypt.compare('password', HASH7, spy, function(result) {
                     result.should.be.true;
                     spy.should.have.been.called();
                     done();

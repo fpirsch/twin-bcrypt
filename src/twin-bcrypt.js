@@ -557,7 +557,7 @@
         if (callback) {
             if (progress) limit = 127;
             eksBlowfishSetup(passwordb, saltb, P, S, 0, counterEnd, limit, progress, function(result) {
-                callback(null, format(prefix, result));
+                callback(format(prefix, result));
             });
         }
         else {
@@ -601,8 +601,7 @@
             salt - [OPTIONAL] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used (see examples).
             progress - [OPTIONAL] - a callback to be called during the hash calculation to signify progress
             callback - [REQUIRED] - a callback to be fired once the data has been encrypted. uses eio making it asynchronous.
-                error - First parameter to the callback detailing any errors.
-                encrypted - Second parameter to the callback providing the encrypted form.
+                hashed - First parameter to the callback providing the hashed form.
         */
         if (typeof data !== 'string') throw new Error('Incorrect arguments');
         if (arguments.length === 2) {
@@ -650,7 +649,6 @@
             hash - [REQUIRED] - reference hash to check the password against.
             progress - [OPTIONAL] - a callback to be called during the hash verification to signify progress
             callback - [REQUIRED] - a callback to be fired once the data has been compared. uses eio making it asynchronous.
-                error - First parameter to the callback detailing any errors.
                 same - Second parameter to the callback providing whether the data and encrypted forms match [true | false].
         */
         if (typeof password !== 'string' ||  typeof refhash !== 'string' || !HASH_PATTERN.test(refhash)) {
@@ -664,8 +662,8 @@
             throw new Error('No callback function was given.');
         }
         var salt = refhash.substr(0, refhash.length - 31);
-        hash(password, salt, progress, function(error, result) {
-            callback(error, result === refhash);
+        hash(password, salt, progress, function(result) {
+            callback(result === refhash);
         });
     }
 
