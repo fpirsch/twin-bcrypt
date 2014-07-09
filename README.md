@@ -16,9 +16,21 @@ TwinBcrypt.compareSync("veggies", hash); // false
 
 Asynchronous
 ```
+// Simple
 TwinBcrypt.hash("bacon", function(hash) {
   // Store hash in your password DB.
 });
+
+// With progression info and optional operation abort.
+TwinBcrypt.hash("bacon",
+  function(p) {
+    progressBar.value = p;
+    if (tooLong) return false;
+  },
+  function(hash) {
+    // Store hash in your password DB.
+  }
+);
 
 // Load hash from your password DB.
 TwinBcrypt.compare("bacon", hash, function(res) {
@@ -44,7 +56,7 @@ Though you can use your custom salt and there is no need for salts to be persist
     * `salt` - [OPTIONAL] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used.
     * `progress` - [OPTIONAL] - a callback to be invoked during the hash calculation to signify progress. This callback can return `false` to stop the process.
         * `p` - Value between 0 (exclusive) and 1 (inclusive), sent as a parameter to the progress callback.
-    * `callback` - [REQUIRED] - a callback to be fired once the data has been encrypted.
+    * `callback` - [REQUIRED] - a callback to be fired once the data has been encrypted (and if the process has not been stopped).
         * `result` - Hashed data received as an argument.
 * `compareSync(password, refhash)`
     * `password` - [REQUIRED] - password to check.
@@ -56,7 +68,7 @@ Though you can use your custom salt and there is no need for salts to be persist
     * `progress` - [OPTIONAL] - a callback to be called during the hash verification to signify progress
         * `p` - Value between 0 (exclusive) and 1 (inclusive), sent as a parameter to the progress callback. This callback can return `false` to stop the process.
     * `callback` - [REQUIRED] - a callback to be fired once the data has been compared.
-        * `result` - Boolean received as an argument to the callback, indicating whether the data and encrypted forms match.
+        * `result` - Boolean received as an argument to the callback, indicating whether the data and encrypted forms match (and if the process has not been stopped).
 * `encodingMode`
     * `ENCODING_UTF8` (default) - encodes non-ascii characters to utf-8 before hashing.
     * `ENCODING_RAW` - does not encode non-ascii characters in the password. This allows the use of custom encodings.
