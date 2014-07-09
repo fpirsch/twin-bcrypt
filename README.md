@@ -33,11 +33,11 @@ TwinBcrypt.hash("bacon",
 );
 
 // Load hash from your password DB.
-TwinBcrypt.compare("bacon", hash, function(res) {
-    // res == true
+TwinBcrypt.compare("bacon", hash, function(result) {
+    // result === true
 });
-TwinBcrypt.compare("veggies", hash, function(res) {
-    // res = false
+TwinBcrypt.compare("veggies", hash, function(result) {
+    // result === false
 });
 ```
 
