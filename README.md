@@ -16,15 +16,15 @@ TwinBcrypt.compareSync("veggies", hash); // false
 
 Asynchronous
 ```
-TwinBcrypt.hash("bacon", function(err, hash) {
+TwinBcrypt.hash("bacon", function(hash) {
   // Store hash in your password DB.
 });
 
 // Load hash from your password DB.
-TwinBcrypt.compare("bacon", hash, function(err, res) {
+TwinBcrypt.compare("bacon", hash, function(res) {
     // res == true
 });
-TwinBcrypt.compare("veggies", hash, function(err, res) {
+TwinBcrypt.compare("veggies", hash, function(res) {
     // res = false
 });
 ```
