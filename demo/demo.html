@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Twin-Bcrypt</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="demo.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="page-header">
+                <h1>Twin-Bcrypt browser demo</h1>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Asynchronous, non-blocking</h3>
+                    The Bcrypt algorithm is computationnally intensive by design, but this implementation
+                    doesn't freeze your browser or node module.
+                    <strong>Abort it</strong> if it takes too much time. It works <strong>synchronously, too</strong>.
+                </div>
+                <div class="col-md-6">
+                    <h3>Cryptographically strong random values</h3>
+                    Uses the <a href="http://nodejs.org/api/crypto.html">Crypto module</a> on Node.js and
+                    the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window.crypto">Web Cryptography API</a> in browsers.
+                </div>
+            </div>
+
+            <form class="form-inline" role="form">
+                <div class="form-group">
+                    <label for="input1">password: </label>
+                    <input id="input1" type="text" class="form-control" value="pAasW0rd">
+                </div>
+                <div class="form-group">
+                    <label for="select1">cost: </label>
+                    <select id="select1">
+                        <option>4</option>
+                        <option selected="">12</option>
+                        <option>13</option>
+                        <option>15</option>
+                        <option>17</option>
+                        <option>30</option>
+                        <option>31</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" data-label="Hash it !">Hash it !</button>
+                <progress value="0" max="1">0 %</progress>
+                <samp class="form-control lg">Click to hash.</samp>
+            </form>
+
+            <form class="form-inline" role="form">
+                <div class="form-group">
+                    <label for="input2">password: </label>
+                    <input id="input2" type="text" class="form-control" value="passwort">
+                </div>
+                <div class="form-group">
+                    <label for="select2">cost: </label>
+                    <select id="select2">
+                        <option>4</option>
+                        <option>12</option>
+                        <option selected="">13</option>
+                        <option>15</option>
+                        <option>17</option>
+                        <option>30</option>
+                        <option>31</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" data-label="Hash it !">Hash it !</button>
+                <progress value="0" max="1">0 %</progress>
+                <samp class="form-control lg">Click to hash.</samp>
+            </form>
+
+            <form class="form-inline" role="form">
+                <div class="form-group has-feedback">
+                    <label for="input3" class="control-label">password: </label>
+                    <input id="input3" type="text" class="form-control" value="pAasW0rd">
+                    <span class="glyphicon form-control-feedback"></span>
+                </div>
+                <div class="form-group">
+                    <progress class="under" value="0" max="1">0 %</progress>
+                    <label for="input4">hash: </label>
+                    <input id="input4" type="text" class="form-control lg transparent" value="$2y$12$oZ/VU5E.VKKlSkLMRmfUBe.pszCdecj04Lm1O1ESoLp5x.1qmBzoK">
+                </div>
+                <button class="btn btn-primary" data-label="Compare it !">Compare it !</button>
+            </form>
+
+        </div>
+
+        <a href="https://github.com/fpirsch/twin-bcrypt"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
+
+        <script src="../twin-bcrypt.min.js"></script>
+        <script src="demo.js"></script>
+    </body>
+</html>

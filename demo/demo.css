@@ -1,0 +1,39 @@
+form {
+    margin-top: 3em;
+}
+
+button {
+    width: 100px;
+}
+
+progress {
+    height: 20px;
+    vertical-align: middle;
+    width: 37em;
+}
+
+progress.under {
+    position: absolute;
+    height: 34px;
+    right: 0;
+    top: 0;
+}
+
+.form-group {
+    position: relative;
+}
+
+.form-control.transparent {
+    position: relative;
+    background-color: transparent;
+}
+
+.form-inline .form-control.lg {
+    width: 37em;
+    white-space: nowrap;
+}
+
+form:not([data-computing]) progress,
+form[data-computing] samp.form-control {
+    display: none
+}
