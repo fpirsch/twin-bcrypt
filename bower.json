@@ -9,7 +9,11 @@
       "node_modules",
       "src",
       "test",
-      "/*.txt"
+      "/*.txt",
+      "/*.json",
+      "/*.yml",
+      "/.gitignore",
+      "/Gearfile.js"
   ],
   "keywords": [
     "bcrypt",
