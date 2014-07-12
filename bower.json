@@ -1,0 +1,27 @@
+{
+  "name": "twin-bcrypt",
+  "version": "0.1.0",
+  "homepage": "https://github.com/fpirsch/twin-bcrypt",
+  "description": "Pure JS bcrypt password hashing algorithm for node and the browser",
+  "main": "twin-bcrypt.min.js",
+  "ignore": [
+      "demo/",
+      "node_modules",
+      "src",
+      "test",
+      "/*.txt"
+  ],
+  "keywords": [
+    "bcrypt",
+    "javascript",
+    "js",
+    "hash",
+    "password",
+    "auth",
+    "authentication",
+    "encryption",
+    "crypt",
+    "crypto"
+  ],
+  "license": "BSD-3-Clause"
+}
