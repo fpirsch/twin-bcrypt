@@ -189,6 +189,14 @@ describe('API test suite', function() {
                 });
             });
 
+            it('should not overflow when cost = 31', function(done) {
+                TwinBcrypt.hash('password', 31, function(p) {
+                    p.should.be.below(1e-7);
+                    done();
+                    return false;
+                }, function(result) {});
+            });
+
         });
     });
 

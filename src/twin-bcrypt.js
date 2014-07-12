@@ -542,7 +542,7 @@
             string2utf8Bytes(password) : string2rawBytes(password);
         var saltb = decode_base64(real_salt, BCRYPT_SALT_LEN);
 
-        var rounds = 1 << log_rounds;
+        var rounds = (log_rounds < 31) ? 1 << log_rounds : 2147483648;
         var counterEnd = rounds -1,
             limit = counterEnd,
             LR = new Array(0x00000000, 0x00000000),
