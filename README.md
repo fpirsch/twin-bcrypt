@@ -1,5 +1,6 @@
 twin-bcrypt
 ===========
+[![Build Status](https://secure.travis-ci.org/fpirsch/twin-bcrypt.png)](http://travis-ci.org/fpirsch/twin-bcrypt.png)
 [![Dependency Status](https://david-dm.org/fpirsch/twin-bcrypt.png)](https://david-dm.org/fpirsch/twin-bcrypt)
 
 Pure JS implementation of the [BCrypt](https://en.wikipedia.org/wiki/Bcrypt) algorithm for Node and the browser without dependencies.
