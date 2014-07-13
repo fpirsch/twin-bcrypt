@@ -681,6 +681,6 @@
     exports.cryptoRNG = cryptoRNG;
     exports.randomBytes = randomBytes;
     exports.defaultCost = GENSALT_DEFAULT_LOG2_ROUNDS;
-	exports.version = "0.1.0"; // TODO bump new non-breaking feature
+	exports.version = "0.2.0";
 
 }));
