@@ -6,7 +6,7 @@
         factory(exports, require('crypto'));
     } else {
         // Browser globals
-        factory((root.TwinBcrypt = {}), null);
+        factory(root.TwinBcrypt = {}, null);
     }
 }(this, function (exports, crypto) {
 
@@ -681,5 +681,6 @@
     exports.cryptoRNG = cryptoRNG;
     exports.randomBytes = randomBytes;
     exports.defaultCost = GENSALT_DEFAULT_LOG2_ROUNDS;
-	exports.version = "0.0.1-alpha";
+	exports.version = "0.1.0"; // TODO bump new non-breaking feature
+
 }));

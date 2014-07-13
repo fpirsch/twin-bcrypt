@@ -1,4 +1,5 @@
 node_modules/
+doc/
 *.txt
 /*.html
 test.js
