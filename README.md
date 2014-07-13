@@ -100,5 +100,3 @@ However it does not emulate the sign extension bug of old crypt_blowfish impleme
 ## Credits
 This project is a fork of [bcrypt-nodejs](https://github.com/shaneGirish/bcrypt-nodejs), which is based on [javascript-bcrypt](https://code.google.com/p/javascript-bcrypt/), which is itself a
 javascript port of damien miller's [jBCrypt](https://code.google.com/p/jbcrypt/).
-
-[node.bcrypt.js](https://github.com/ncb000gt/node.bcrypt.js.git)
