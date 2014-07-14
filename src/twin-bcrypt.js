@@ -503,7 +503,7 @@
                     return encryptECB(P, S);
                 }
             }
-            else if (setImmediate) {
+            else if (callback) {
                 setImmediate(eksBlowfishSetup.bind(null, password, salt, P, S, i, counterEnd, limit, progress, callback));
                 return;
             }
