@@ -357,7 +357,7 @@
         var r = lr[off + 1];
 
         l ^= P[0];
-        for (i = 0; i <= BLOWFISH_NUM_ROUNDS - 2;) {
+        for (i = 0; i < BLOWFISH_NUM_ROUNDS;) {
             // Feistel substitution on left word
             n = S[l >>> 24];
             n += S[0x100 | ((l >> 16) & 0xff)];
