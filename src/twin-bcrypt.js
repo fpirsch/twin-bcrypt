@@ -479,25 +479,34 @@
     }
 
     function eksBlowfishSetup(password, salt, P, S, counterStart, counterEnd, limit, progress, callback) {
-        var i = counterStart,
-            j = 0;
-        while(i <= counterEnd && j <= limit) {
-            expandKey(password, P, S);
-            expandKey(salt, P, S);
-            i++;
-            j++;
-        }
+        var i = counterStart;
+        while (i <= counterEnd) {
+            var j = 0;
+            while (i <= counterEnd && j <= limit) {
+                expandKey(password, P, S);
+                expandKey(salt, P, S);
+                i++;
+                j++;
+            }
 
-        if (progress) {
-            var result = progress(i / (counterEnd+1));
-            if (result === false) return;
-        }
+            if (progress) {
+                var result = progress(i / (counterEnd+1));
+                if (result === false) return;
+            }
 
-        if (i <= counterEnd) {
-            setImmediate(eksBlowfishSetup.bind(null, password, salt, P, S, i, counterEnd, limit, progress, callback));
-        }
-        else {
-            setImmediate(encryptECB.bind(null, P, S, callback));
+            if (i > counterEnd) {
+                if (callback) {
+                    setImmediate(encryptECB.bind(null, P, S, callback));
+                    return;
+                }
+                else {
+                    return encryptECB(P, S);
+                }
+            }
+            else if (setImmediate) {
+                setImmediate(eksBlowfishSetup.bind(null, password, salt, P, S, i, counterEnd, limit, progress, callback));
+                return;
+            }
         }
     }
 
@@ -544,7 +553,7 @@
 
         var rounds = (log_rounds < 31) ? 1 << log_rounds : 2147483648;
         var counterEnd = rounds -1,
-            limit = counterEnd,
+            limit = progress ? 127 : counterEnd,
             LR = new Array(0x00000000, 0x00000000),
             P = P_orig.slice(),
             S = S_orig.slice();
@@ -555,13 +564,12 @@
         ekskey(saltb, passwordb, LR, P, S);
 
         if (callback) {
-            if (progress) limit = 127;
             eksBlowfishSetup(passwordb, saltb, P, S, 0, counterEnd, limit, progress, function(result) {
                 callback(format(prefix, result));
             });
         }
         else {
-            eksBlowfishSetup(passwordb, saltb, P, S, 0, counterEnd, limit);
+            eksBlowfishSetup(passwordb, saltb, P, S, 0, counterEnd, limit, progress);
             return format(prefix, encryptECB(P, S));
         }
     }
@@ -584,15 +592,16 @@
 
     var SALT_PATTERN = /^\$2[ay]\$(0[4-9]|[12][0-9]|3[01])\$[.\/A-Za-z0-9]{21}[.Oeu]/;
 
-    function hashSync(data, salt) {
+    function hashSync(data, salt, progress) {
         /*
             data - [REQUIRED] - the data to be encrypted.
             salt - [OPTIONAL] - the salt to be used in encryption. If specified as a number then a salt will be generated and used (see examples).
+            progress - [OPTIONAL] - progression callback. Mostly for internal use : synchronous, too.
         */
         if (typeof data !== 'string') throw new Error('Incorrect arguments');
         if (!salt || typeof salt === 'number') salt = genSalt(salt);
         else if (typeof salt !== 'string' || !SALT_PATTERN.test(salt)) throw new Error('Invalid salt');
-        return hashpw(data, salt);
+        return hashpw(data, salt, progress);
     }
 
     function hash(data, salt, progress, callback) {
@@ -681,6 +690,6 @@
     exports.cryptoRNG = cryptoRNG;
     exports.randomBytes = randomBytes;
     exports.defaultCost = GENSALT_DEFAULT_LOG2_ROUNDS;
-	exports.version = "0.2.0";
+	exports.version = "{{ version }}";
 
 }));
