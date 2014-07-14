@@ -4,7 +4,9 @@ twin-bcrypt
 [![Dependency Status](https://david-dm.org/fpirsch/twin-bcrypt.png)](https://david-dm.org/fpirsch/twin-bcrypt)
 
 Pure JS implementation of the [BCrypt](https://en.wikipedia.org/wiki/Bcrypt) algorithm for Node and the browser without dependencies.
-See the [demo here](http://fpirsch.github.io/twin-bcrypt/). Also used in the real world in this great [.htpasswd file generator](http://aspirine.org/htpasswd_en.html).
+See the [demo here](http://fpirsch.github.io/twin-bcrypt/).
+Also used in the real world in this great [.htpasswd file generator](http://aspirine.org/htpasswd_en.html) in parallel with
+[web workers](https://en.wikipedia.org/wiki/Web_worker).
 
 
 ## Basic usage:
