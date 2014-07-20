@@ -3,29 +3,31 @@ twin-bcrypt
 [![Build Status](https://secure.travis-ci.org/fpirsch/twin-bcrypt.png)](http://travis-ci.org/fpirsch/twin-bcrypt.png)
 [![Dependency Status](https://david-dm.org/fpirsch/twin-bcrypt.png)](https://david-dm.org/fpirsch/twin-bcrypt)
 
-Pure JS implementation of the [BCrypt](https://en.wikipedia.org/wiki/Bcrypt) algorithm for Node and the browser without dependencies.
+Fast [asm.js](https://en.wikipedia.org/wiki/Asm.js) implementation of the [BCrypt](https://en.wikipedia.org/wiki/Bcrypt) algorithm for Node and the browser without dependencies.
 See the [demo here](http://fpirsch.github.io/twin-bcrypt/).
 Also used in the real world in this great [.htpasswd file generator](http://aspirine.org/htpasswd_en.html) in parallel with
 [web workers](https://en.wikipedia.org/wiki/Web_worker).
 
 
 ## Basic usage:
-Synchronous
-```
+#### Synchronous
+```javascript
 var hash = TwinBcrypt.hashSync("bacon");
 
 TwinBcrypt.compareSync("bacon", hash); // true
 TwinBcrypt.compareSync("veggies", hash); // false
 ```
 
-Asynchronous
-```
-// Simple
+#### Asynchronous
+With a default-generated salt.
+```javascript
 TwinBcrypt.hash("bacon", function(hash) {
   // Store hash in your password DB.
 });
+```
 
-// With progression info and optional operation abort.
+With progression info and optional operation abort.
+```javascript
 TwinBcrypt.hash("bacon",
   function(p) {
     progressBar.value = p;
@@ -35,7 +37,10 @@ TwinBcrypt.hash("bacon",
     // Store hash in your password DB.
   }
 );
+```
 
+Check a given password against a given hash
+```javascript
 // Load hash from your password DB.
 TwinBcrypt.compare("bacon", hash, function(result) {
     // result === true
