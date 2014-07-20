@@ -2,7 +2,7 @@
   "name": "twin-bcrypt",
   "version": "0.2.3",
   "homepage": "https://github.com/fpirsch/twin-bcrypt",
-  "description": "Pure JS bcrypt password hashing algorithm for node and the browser",
+  "description": "Asm.js bcrypt password hashing algorithm for node and the browser",
   "main": "twin-bcrypt.min.js",
   "ignore": [
       "demo/",
@@ -19,6 +19,7 @@
     "bcrypt",
     "javascript",
     "js",
+    "asm.js",
     "hash",
     "password",
     "auth",
