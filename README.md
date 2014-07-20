@@ -62,7 +62,7 @@ Though you can use your custom salt and there is no need for salts to be persist
 * `hashSync(data, salt)`
     * `data` - [REQUIRED] - the data to be encrypted.
     * `salt` - [OPTIONAL] - the salt to be used in encryption. If specified as a number then a salt will be generated and used.
-* `hash(data, salt, progress, cb)`
+* `hash(data, salt, progress, callback)`
     * `data` - [REQUIRED] - the data to be encrypted.
     * `salt` - [OPTIONAL] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used.
     * `progress` - [OPTIONAL] - a callback to be invoked during the hash calculation to signify progress. This callback can return `false` to stop the process.
@@ -73,7 +73,7 @@ Though you can use your custom salt and there is no need for salts to be persist
     * `password` - [REQUIRED] - password to check.
     * `refhash` - [REQUIRED] - reference hash to check the password against.
     Returns true if the password matches, false if it doesn't. Throws an error if arguments are invalid.
-* `compare(password, refhash, progress, cb)`
+* `compare(password, refhash, progress, callback)`
     * `password` - [REQUIRED] - password to check.
     * `refhash` - [REQUIRED] - reference hash to check the password against.
     * `progress` - [OPTIONAL] - a callback to be called during the hash verification to signify progress
