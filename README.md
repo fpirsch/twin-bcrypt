@@ -10,7 +10,7 @@ Also used in the real world in this great [.htpasswd file generator](http://aspi
 
 
 ## Basic usage:
-#### Synchronous
+#### Synchronous (blocking)
 ```javascript
 var hash = TwinBcrypt.hashSync("bacon");
 
@@ -18,7 +18,9 @@ TwinBcrypt.compareSync("bacon", hash); // true
 TwinBcrypt.compareSync("veggies", hash); // false
 ```
 
-#### Asynchronous
+#### Asynchronous (non-blocking)
+Asynchronous mode is preferred. Besides not blocking the javascript engine, it gives the opportunity to display progression information, and even to abort computations.
+
 With a default-generated salt.
 ```javascript
 TwinBcrypt.hash("bacon", function(hash) {
