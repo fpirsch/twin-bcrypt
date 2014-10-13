@@ -4,7 +4,7 @@
 // This test suite comes from the jBCrypt java project, which has been ported and forked a few times to become twin-bcrypt.
 // The original code can be found at https://code.google.com/p/jbcrypt/source/browse/#svn/trunk/src/test/java/org/mindrot/jbcrypt
 describe('jBCrypt test suite', function() {
-    this.timeout(3000);
+    this.timeout(5000);
 
     // This test suite can take more than 10s on node and is too slow to be run in a browser.
     it('should hash an empty password', function() {
