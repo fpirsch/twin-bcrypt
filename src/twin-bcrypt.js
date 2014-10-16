@@ -12,6 +12,8 @@
 
     "use strict";
 
+    var isFirefox = typeof InstallTrigger !== 'undefined';
+    var useAsm = isFirefox;
 
 	// Default random number generator for IE<11
 	var cryptoRNG = false;
@@ -63,18 +65,10 @@
     var GENSALT_DEFAULT_LOG2_ROUNDS = 10;
     var BLOWFISH_NUM_ROUNDS = 16;
 
-    var password_offset = 0x0000,
-        salt_offset = 0x0100,
-        crypt_ciphertext_offset = 0x0200,
-        LR_offset = 0x0300,
-        P_offset = 0x0400,
-        S_offset = 0x1000;
-
     var P = [0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344, 0xa4093822,
             0x299f31d0, 0x082efa98, 0xec4e6c89, 0x452821e6, 0x38d01377,
             0xbe5466cf, 0x34e90c6c, 0xc0ac29b7, 0xc97c50dd, 0x3f84d5b5,
             0xb5470917, 0x9216d5d9, 0x8979fb1b];
-
     var S = [0xd1310ba6, 0x98dfb5ac, 0x2ffd72db, 0xd01adfb7, 0xb8e1afed,
             0x6a267e96, 0xba7c9045, 0xf12c7f99, 0x24a19947, 0xb3916cf7,
             0x0801f2e2, 0x858efc16, 0x636920d8, 0x71574e69, 0xa458fea3,
@@ -280,13 +274,19 @@
             0x7aaaf9b0, 0x4cf9aa7e, 0x1948c25c, 0x02fb8a8c, 0x01c36ae4,
             0xd6ebe1f9, 0x90d4f869, 0xa65cdea0, 0x3f09252d, 0xc208e69f,
             0xb74e6132, 0xce77e25b, 0x578fdfe3, 0x3ac372e6];
-
+    var P_LEN = P.length,
+        S_LEN = S.length;
     var bf_crypt_ciphertext = [0x4f727068, 0x65616e42, 0x65686f6c, 0x64657253,
             0x63727944, 0x6f756274];
 
-    var P_LEN = P.length,
-        S_LEN = S.length;
-
+    var S_offset = 0x0000,          // length 0x1000 octets
+        P_offset = 0x1000,          // length 0x0048 (72) octets
+        P_last_offset = 0x1044,
+        crypt_ciphertext_offset = 0x1048,    // length 0x0018 (24) octets
+        LR_offset = 0x01060,        // length 8 octets
+        password_offset = 0x1068,   // length 0x0048 (72) octets
+        salt_offset = 0x10b0;       // length 0x0048 (72) octets, 18 uint32
+    
     var base64_code = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var index_64 = [0, 1,
             54, 55, 56, 57, 58, 59, 60, 61, 62, 63, -1, -1, -1, -1, -1, -1, -1,
@@ -324,14 +324,6 @@
         return rs;
     }
 
-    function cycle72(a, heap8, offset) {
-        var len = a.length, i = 0;
-        for (var j = 0; j < 72; j++) {
-            heap8[offset++] = a[i++];
-            if (i === len) i = 0;
-        }
-    }
-
     /**
      * salt is a 22 character string from the alphabet
      * './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -357,24 +349,119 @@
         return decoded;
     }
 
+    function cycle72(a) {
+        var len = a.length, b = new Array(72), i = 0, j = 0;
+        while (j < 72) {
+            b[j++] = a[i++];
+            if (i === len) i = 0;
+        }
+        return b;
+    }
+
+    function heap32Set(dest, source, offset) {
+        for(var i = 0, o = offset >> 2; i < source.length; i++, o++) {
+            dest[o] = source[i];
+        }
+    }
+
+    function copyLittleEndian(heap32, offset, data) {
+        for (var i = 0; i < 72;) {
+            heap32[offset++] = data[i++] | data[i++] << 8 | data[i++] << 16 | data[i++] << 24;
+        }
+    }
+
+
+    function bcryptNoAsm(heap32) {
+        var s0 = S_offset >> 2,
+            s1 = (s0 + 0x100) | 0,
+            s2 = (s1 + 0x100) | 0,
+            s3 = (s2 + 0x100) | 0;
+
+function encrypt(offset) {
+  var h = heap32, i = P_offset >> 2, iend = i | BLOWFISH_NUM_ROUNDS,
+      o = offset>>2, L = h[o] ^ h[i], R = h[o+1]|0;
+  while (i<iend) {
+    R^=(((h[s0|L>>>24]+h[s1|(L>>>16&0xff)])^h[s2|(L>>>8&0xff)])+h[s3|(L&0xff)])^h[++i];
+    L^=(((h[s0|R>>>24]+h[s1|(R>>>16&0xff)])^h[s2|(R>>>8&0xff)])+h[s3|(R&0xff)])^h[++i];
+  }
+  h[o] = R ^ h[P_last_offset>>2];
+  h[o+1] = L;
+}
+        function expandKey(offset) {
+            var i, u, sw;
+            heap32[LR_offset >> 2] = 0;
+            heap32[LR_offset + 4 >> 2] = 0;
+
+            for (i = 0; i < P_LEN; i++) {
+                u = heap32[(offset>>2)+i];   // little-endian
+                sw = u << 24 | (u & 0x0000ff00) << 8 | (u & 0x00ff0000) >>> 8 | u >>> 24;
+                heap32[P_offset >> 2 | i] ^= sw;
+            }
+            
+            var h = heap32, j, jend, o, L, R;
+            for (i = 0; i < P_LEN; i += 2) {
+                j = P_offset >> 2; jend = j | BLOWFISH_NUM_ROUNDS;
+                o = LR_offset>>2; L = h[o] ^ h[j]; R = h[o+1]|0;
+                while (j<jend) {
+                    R^=(((h[s0|L>>>24]+h[s1|(L>>>16&0xff)])^h[s2|(L>>>8&0xff)])+h[s3|(L&0xff)])^h[++j];
+                    L^=(((h[s0|R>>>24]+h[s1|(R>>>16&0xff)])^h[s2|(R>>>8&0xff)])+h[s3|(R&0xff)])^h[++j];
+                }
+                h[o] = R ^ h[P_last_offset>>2];
+                h[o+1] = L;
+                heap32[P_offset >> 2 | i] = h[o];
+                heap32[P_offset >> 2 | (i + 1)] = L;
+            }
+
+            for (i = 0; i < S_LEN; i += 2) {
+                j = P_offset >> 2; jend = j | BLOWFISH_NUM_ROUNDS;
+                o = LR_offset>>2; L = h[o] ^ h[j]; R = h[o+1]|0;
+                while (j<jend) {
+                    R^=(((h[s0|L>>>24]+h[s1|(L>>>16&0xff)])^h[s2|(L>>>8&0xff)])+h[s3|(L&0xff)])^h[++j];
+                    L^=(((h[s0|R>>>24]+h[s1|(R>>>16&0xff)])^h[s2|(R>>>8&0xff)])+h[s3|(R&0xff)])^h[++j];
+                }
+                h[o] = R ^ h[P_last_offset>>2];
+                h[o+1] = L;
+                heap32[s0 | i] = h[o];
+                heap32[s0 | (i + 1)] = L;
+            }
+        }
+
+        function expandLoop(i, counterEnd, maxIterations) {
+            for (var j = 0; j <= maxIterations; j++) {
+                if (i > counterEnd) break;
+                expandKey(password_offset);
+                expandKey(salt_offset);
+                i++;
+                j++;
+            }
+            return i;
+        }
+        
+        return {
+            encrypt: encrypt,
+            expandLoop: expandLoop
+        };
+    }
+
     /* @preserve BEGIN ASM */
-    function bcryptModule(stdlib, foreign, heap) {
+    function bcryptAsm(stdlib, foreign, heap) {
         "use asm";
 
         var HEAP32 = new stdlib.Uint32Array(heap);
         var HEAP8 = new stdlib.Uint8Array(heap);
 
         var BLOWFISH_NUM_ROUNDS = 16;
-        var password_offset = 0x0000;
-        var salt_offset = 0x0100;
-        var LR_offset = 0x0300;
-        var P_offset = 0x400;
-        var P_last_offset = 0x444;
+        var S_offset = 0x0000;          // length 0x1000 octets
+        var S1_offset = 0x0400;
+        var S2_offset = 0x0800;
+        var S3_offset = 0x0C00;
+        var P_offset = 0x1000;          // length 0x0048 (72) octets
+        var P_last_offset = 0x1044;
+        var crypt_ciphertext_offset = 0x1048;    // length 0x0018 (24) octets
+        var LR_offset = 0x01060;        // length 8 octets
+        var password_offset = 0x1068;   // length 0x0048 (72) octets
+        var salt_offset = 0x10b0;       // length 0x0048 (72) octets, 18 uint32
         var P_LEN = 18;
-        var S_offset = 0x1000;
-        var S1_offset = 0x1400;
-        var S2_offset = 0x1800;
-        var S3_offset = 0x1C00;
         var S_LEN = 1024;
 
         function encrypt(offset) {
@@ -469,51 +556,55 @@
     }
     /* @preserve END ASM */
 
-    function ekskey(heap8, heap32, asm) {
+    function ekskey(data, key, engine, heap32) {
         var i, off, sw;
-        
-        heap32[LR_offset >> 2] = 0;
-        heap32[LR_offset >> 2 | 1] = 0;
+        var L_offset = LR_offset >> 2,
+            R_offset = L_offset + 1;
 
-        off = password_offset;
+        heap32[L_offset] = 0;
+        heap32[R_offset] = 0;
+        
+        off = 0;
         for (i = 0; i < P_LEN; i++) {
-            sw = heap8[off++] << 24 | heap8[off++] << 16 | heap8[off++] << 8 | heap8[off++];
+            sw = key[off++] << 24 | key[off++] << 16 | key[off++] << 8 | key[off++];
             heap32[P_offset >> 2 | i] ^= sw;
         }
-        off = salt_offset;
+        
+        off = 0;
         for (i = 0; i < P_LEN; i += 2) {
-            sw = heap8[off++] << 24 | heap8[off++] << 16 | heap8[off++] << 8 | heap8[off++];
+            sw = data[off++] << 24 | data[off++] << 16 | data[off++] << 8 | data[off++];
             off &= 0xff0f;   // &0xff0f === %BCRYPT_SALT_LEN
-            heap32[LR_offset >> 2] ^= sw;
+            heap32[L_offset] ^= sw;
 
-            sw = heap8[off++] << 24 | heap8[off++] << 16 | heap8[off++] << 8 | heap8[off++];
+            sw = data[off++] << 24 | data[off++] << 16 | data[off++] << 8 | data[off++];
             off &= 0xff0f;
-            heap32[LR_offset >> 2 | 1] ^= sw;
+            heap32[R_offset] ^= sw;
 
-            asm.encrypt(LR_offset);
-            heap32[P_offset >> 2 | i] = heap32[LR_offset >> 2];
-            heap32[P_offset >> 2 | i + 1] = heap32[LR_offset >> 2 | 1];
+            engine.encrypt(LR_offset);
+            heap32[P_offset >> 2 | i] = heap32[L_offset];
+            heap32[P_offset >> 2 | (i + 1)] = heap32[R_offset];
         }
-
+        
+        var s_offset = S_offset >> 2;
         for (i = 0; i < S_LEN; i += 2) {
-            sw = heap8[off++] << 24 | heap8[off++] << 16 | heap8[off++] << 8 | heap8[off++];
+            sw = data[off++] << 24 | data[off++] << 16 | data[off++] << 8 | data[off++];
             off &= 0xff0f;   // &0xff0f === %BCRYPT_SALT_LEN
-            heap32[LR_offset >> 2] ^= sw;
+            heap32[L_offset] ^= sw;
 
-            sw = heap8[off++] << 24 | heap8[off++] << 16 | heap8[off++] << 8 | heap8[off++];
+            sw = data[off++] << 24 | data[off++] << 16 | data[off++] << 8 | data[off++];
             off &= 0xff0f;
-            heap32[LR_offset >> 2 | 1] ^= sw;
+            heap32[R_offset] ^= sw;
 
-            asm.encrypt(LR_offset);
-            heap32[S_offset >> 2 | i] = heap32[LR_offset >> 2];
-            heap32[S_offset >> 2 | i + 1] = heap32[LR_offset >> 2 | 1];
+            engine.encrypt(LR_offset);
+            heap32[s_offset | i] = heap32[L_offset];
+            heap32[s_offset | (i + 1)] = heap32[R_offset];
         }
     }
 
-    function eksBlowfishSetup(asm, heap32, counterStart, counterEnd, limit, progress, callback) {
+    function eksBlowfishSetup(engine, heap32, counterStart, counterEnd, limit, progress, callback) {
         var i = counterStart;
         while (i <= counterEnd) {
-            i = asm.expandLoop(i, counterEnd, limit);
+            i = engine.expandLoop(i, counterEnd, limit);
 
             if (progress) {
                 var result = progress(i / (counterEnd+1));
@@ -522,26 +613,26 @@
 
             if (i > counterEnd) {
                 if (callback) {
-                    setImmediate(encryptECB.bind(null, asm, heap32, callback));
+                    setImmediate(encryptECB.bind(null, engine, heap32, callback));
                     return;
                 }
                 return;
             }
             else if (callback) {
-                setImmediate(eksBlowfishSetup.bind(null, asm, heap32, i, counterEnd, limit, progress, callback));
+                setImmediate(eksBlowfishSetup.bind(null, engine, heap32, i, counterEnd, limit, progress, callback));
                 return;
             }
         }
     }
 
-    function encryptECB(asm, heap32, callback) {
-        heap32.set(bf_crypt_ciphertext, crypt_ciphertext_offset >> 2);
+    function encryptECB(engine, heap32, callback) {
+        heap32Set(heap32, bf_crypt_ciphertext, crypt_ciphertext_offset);
 
         var i;
         for (i = 0; i < 64; i++) {
-            asm.encrypt(crypt_ciphertext_offset + 0);
-            asm.encrypt(crypt_ciphertext_offset + 8);
-            asm.encrypt(crypt_ciphertext_offset + 16);
+            engine.encrypt(crypt_ciphertext_offset + 0);
+            engine.encrypt(crypt_ciphertext_offset + 8);
+            engine.encrypt(crypt_ciphertext_offset + 16);
         }
 
         var u,
@@ -549,7 +640,7 @@
             clen = bf_crypt_ciphertext.length,
             ret = new Array(clen * 4);
         for (i = 0; i < clen; i++) {
-            u = heap32[crypt_ciphertext_offset>>2 | i];
+            u = heap32[(crypt_ciphertext_offset>>2) + i];
             ret[j++] = u >> 24;
             ret[j++] = (u >> 16 & 0xff);
             ret[j++] = (u >> 8 & 0xff);
@@ -559,6 +650,7 @@
             callback(ret);
         }
         return ret;
+
     }
 
     function format(prefix, hashed) {
@@ -584,31 +676,38 @@
         var rounds = (log_rounds < 31) ? 1 << log_rounds : 2147483648;
         var counterEnd = rounds -1,
             limit = progress ? 127 : counterEnd;
-        
-        // Création et initialisation de la heap.
-        var heap = new ArrayBuffer(8192),
-            heap8 = new Uint8Array(heap),
-            heap32 = new Uint32Array(heap),
-            asm = bcryptModule({
+
+        var heap32, engine;
+        if (useAsm) {
+            var heap = new ArrayBuffer(8192);
+            heap32 = new Uint32Array(heap);
+            engine = bcryptAsm({
                 Uint8Array: Uint8Array,
                 Uint32Array: Uint32Array
             }, null, heap);
+        }
+        else {
+            heap32 = [];
+            engine = bcryptNoAsm(heap32);
+        }
 
-        heap32.set(P, P_offset >> 2);
-        heap32.set(S, S_offset >> 2);
-        cycle72(passwordb, heap8, password_offset);
-        cycle72(saltb, heap8, salt_offset);
-        
-        ekskey(heap8, heap32, asm);
+        heap32Set(heap32, S, S_offset);
+        heap32Set(heap32, P, P_offset);
+        passwordb = cycle72(passwordb);
+        saltb = cycle72(saltb);
+        copyLittleEndian(heap32, salt_offset >> 2, saltb);
+        copyLittleEndian(heap32, password_offset >> 2, passwordb);
+
+        ekskey(saltb, passwordb, engine, heap32);
 
         if (callback) {
-            eksBlowfishSetup(asm, heap32, 0, counterEnd, limit, progress, function(result) {
+            eksBlowfishSetup(engine, heap32, 0, counterEnd, limit, progress, function(result) {
                 callback(format(prefix, result));
             });
         }
         else {
-            eksBlowfishSetup(asm, heap32, 0, counterEnd, limit, progress);
-            return format(prefix, encryptECB(asm, heap32));
+            eksBlowfishSetup(engine, heap32, 0, counterEnd, limit, progress);
+            return format(prefix, encryptECB(engine, heap32));
         }
     }
 
