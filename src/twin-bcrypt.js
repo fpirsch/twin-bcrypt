@@ -14,26 +14,15 @@
 
     var isFirefox = typeof InstallTrigger !== 'undefined';
     var useAsm = isFirefox;
-
-    // Default random number generator for IE<11
-    var cryptoRNG = false;
-    var randomBytes = function(numBytes) {
-        var bytes = [];
-        for(var i = 0; i < numBytes; i++) {
-            bytes[bytes.length] = Math.floor(Math.random() * 256);
-        }
-        return bytes;
-    };
+    var randomBytes;
 
     if (crypto) {
         // Nodejs crypto random number generator
-        cryptoRNG = true;
         randomBytes = crypto.randomBytes;
     }
     else if(typeof window === 'object') {
         // Cryptographic-quality random number generator for newer browsers.
         if(window.crypto && window.crypto.getRandomValues) {
-            cryptoRNG = true;
             randomBytes = function(numBytes) {
                 var array = new Uint8Array(numBytes);
                 return window.crypto.getRandomValues(array);
@@ -699,10 +688,13 @@ function encrypt(offset) {
         }
     }
 
+    /**
+     * cost - [OPTIONAL] - the cost parameter (default: 10). The number of iterations is 2^cost.
+     */
     function genSalt(cost) {
-        /*
-            cost - [OPTIONAL] - the cost parameter (default: 10). The number of iterations is 2^cost.
-        */
+        if (!randomBytes) {
+            throw new Error('No cryptographically secure pseudorandom number generator available.');
+        }
         if (cost == null) cost = GENSALT_DEFAULT_LOG2_ROUNDS;
         cost = +cost|0;
         if (isNaN(cost) || cost < 4 || cost > 31) {
@@ -810,7 +802,7 @@ function encrypt(offset) {
     exports.ENCODING_RAW = 1;
     exports.encodingMode = exports.ENCODING_UTF8;
 
-    exports.cryptoRNG = cryptoRNG;
+    exports.cryptoRNG = !!randomBytes;
     exports.randomBytes = randomBytes;
     exports.defaultCost = GENSALT_DEFAULT_LOG2_ROUNDS;
     exports.version = "{{ version }}";
