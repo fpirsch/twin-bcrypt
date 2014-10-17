@@ -22,10 +22,11 @@
     }
     else if(typeof window === 'object') {
         // Cryptographic-quality random number generator for newer browsers.
-        if(window.crypto && window.crypto.getRandomValues) {
+        crypto = window.crypto || window.msCrypto;
+        if(crypto && crypto.getRandomValues) {
             randomBytes = function(numBytes) {
                 var array = new Uint8Array(numBytes);
-                return window.crypto.getRandomValues(array);
+                return crypto.getRandomValues(array);
             };
         }
     }
