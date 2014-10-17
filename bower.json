@@ -1,6 +1,6 @@
 {
   "name": "twin-bcrypt",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage": "https://github.com/fpirsch/twin-bcrypt",
   "description": "Asm.js bcrypt password hashing algorithm for node and the browser",
   "main": "twin-bcrypt.min.js",
