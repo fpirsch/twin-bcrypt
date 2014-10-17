@@ -465,7 +465,7 @@ function encrypt(offset) {
             var L = 0;
             var R = 0;
             var imax = 0;
-            imax = P_offset | BLOWFISH_NUM_ROUNDS<<2;
+            imax = P_offset | BLOWFISH_NUM_ROUNDS << 2;
             
             L = HEAP32[offset >> 2]|0;
             R = HEAP32[offset + 4 >> 2]|0;
@@ -473,20 +473,22 @@ function encrypt(offset) {
             L = L ^ HEAP32[P_offset>>2];
             for (i = P_offset; (i|0) < (imax|0);) {
                 // Feistel substitution on left word
-                n = HEAP32[(S_offset | L >>> 22)>>2] >>> 0;
-                n = (n + (HEAP32[(S1_offset | (L >>> 14 & 0x3ff))>>2] >>> 0))>>>0;
-                n = n ^ HEAP32[(S2_offset | (L >>> 6 & 0x3ff))>>2] >>> 0;
-                n = (n + (HEAP32[(S3_offset | (L << 2 & 0x3ff))>>2] >>> 0))>>>0;
                 i = (i + 4)>>>0;
-                R = R ^ n ^ HEAP32[i>>2];
+                R = R ^ (
+                    ((HEAP32[(L >>> 22)>>2] >>> 0) +
+                    (HEAP32[(S1_offset | (L >>> 14 & 0x3ff))>>2] >>> 0) ^
+                    (HEAP32[(S2_offset | (L >>> 6 & 0x3ff))>>2])) +
+                    (HEAP32[(S3_offset | (L << 2 & 0x3ff))>>2] >>> 0)
+                ) ^ HEAP32[i>>2];
 
                 // Feistel substitution on right word
-                n = HEAP32[(S_offset | R >>> 22)>>2] >>> 0;
-                n = (n + (HEAP32[(S1_offset | (R >>> 14 & 0x3ff))>>2] >>> 0))>>>0;
-                n = n ^ HEAP32[(S2_offset | (R >>> 6 & 0x3ff))>>2] >>> 0;
-                n = (n + (HEAP32[(S3_offset | (R << 2 & 0x3ff))>>2] >>> 0))>>>0;
                 i = (i + 4)>>>0;
-                L = L ^ n ^ HEAP32[i>>2];
+                L = L ^ (
+                    ((HEAP32[(R >>> 22)>>2] >>> 0) +
+                    (HEAP32[(S1_offset | (R >>> 14 & 0x3ff))>>2] >>> 0) ^
+                    (HEAP32[(S2_offset | (R >>> 6 & 0x3ff))>>2])) +
+                    (HEAP32[(S3_offset | (R << 2 & 0x3ff))>>2] >>> 0)
+                ) ^ HEAP32[i>>2];
             }
             HEAP32[offset>>2] = R ^ HEAP32[P_last_offset>>2];
             HEAP32[(offset+4)>>2] = L;
