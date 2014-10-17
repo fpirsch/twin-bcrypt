@@ -106,6 +106,14 @@ Twin-bcrypt uses the `$2y$` prefix by default, and can check correct `$2a$` pass
 However it does not emulate the sign extension bug of old crypt_blowfish implementations, and thus doesn't recognize the legacy `$2x$` prefix.
 
 
+## About asm.js
+[asm.js](https://en.wikipedia.org/wiki/Asm.js) is an extraordinarily optimizable, low-level subset of JavaScript designed by Mozilla.
+As a subset of JavaScript it runs in any browser, but until now only Firefox shows really astounding performance. The V8 engine (used in Chrome and Node.js)
+runs asm.js sometimes even slower than regular js.  
+Twin-Bcrypt embeds two functionally identical bcrypt encoders : one is written in asm.js, the other one uses regular JavaScript. The asm.js encoder is
+currently used only in the Firefox browser. This may evolve over time with JavaScript engines to always bring the best performance.
+
+
 ## Credits
 This project is a fork of [bcrypt-nodejs](https://github.com/shaneGirish/bcrypt-nodejs), which is based on [javascript-bcrypt](https://code.google.com/p/javascript-bcrypt/), which is itself a
 javascript port of damien miller's [jBCrypt](https://code.google.com/p/jbcrypt/).
