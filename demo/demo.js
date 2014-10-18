@@ -6,7 +6,9 @@ buttons[0].onclick = clickButton;
 buttons[1].onclick = clickButton;
 buttons[2].onclick = clickButton;
 
-document.getElementById('version').textContent = 'v' + TwinBcrypt.version;
+document.addEventListener('DOMContentLoaded', function(event) {
+    document.getElementById('version').textContent = 'v' + TwinBcrypt.version;
+});
 
 function clickButton(event) {
     var button = event.target,
