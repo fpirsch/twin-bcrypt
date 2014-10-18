@@ -366,14 +366,14 @@
             s3 = (s2 + 0x100) | 0;
 
 function encrypt(offset) {
-  var h = heap32, i = P_offset >> 2, iend = i | BLOWFISH_NUM_ROUNDS,
-      o = offset>>2, L = h[o] ^ h[i], R = h[o+1];
+  var h = heap32, i = P_offset >> 2, iend = i | BLOWFISH_NUM_ROUNDS;
+  var o = offset>>2, L = h[o] ^ h[i], R = h[o|1];
   while (i<iend) {
     R^=(h[L>>>24]+h[s1|(L>>>16&0xff)]^h[s2|(L>>>8&0xff)])+h[s3|(L&0xff)]^h[++i];
     L^=(h[R>>>24]+h[s1|(R>>>16&0xff)]^h[s2|(R>>>8&0xff)])+h[s3|(R&0xff)]^h[++i];
   }
   h[o] = R ^ h[P_last_offset>>2];
-  h[o+1] = L;
+  h[o|1] = L;
 }
         function expandKey(offset) {
             var i;
@@ -387,28 +387,28 @@ function encrypt(offset) {
             var h = heap32, j, jend, o, L, R;
             for (i = 0; i < P_LEN; i += 2) {
                 j = P_offset >> 2; jend = j | BLOWFISH_NUM_ROUNDS;
-                o = LR_offset>>2; L = h[o] ^ h[j]; R = h[o+1];
+                o = LR_offset>>2; L = h[o] ^ h[j]; R = h[o|1];
                 while (j<jend) {
                     R^=(h[L>>>24]+h[s1|(L>>>16&0xff)]^h[s2|(L>>>8&0xff)])+h[s3|(L&0xff)]^h[++j];
                     L^=(h[R>>>24]+h[s1|(R>>>16&0xff)]^h[s2|(R>>>8&0xff)])+h[s3|(R&0xff)]^h[++j];
                 }
                 h[o] = R ^ h[P_last_offset>>2];
-                h[o+1] = L;
+                h[o|1] = L;
                 heap32[P_offset >> 2 | i] = h[o];
                 heap32[P_offset >> 2 | i + 1] = L;
             }
 
             for (i = 0; i < S_LEN; i += 2) {
                 j = P_offset >> 2; jend = j | BLOWFISH_NUM_ROUNDS;
-                o = LR_offset>>2; L = h[o] ^ h[j]; R = h[o+1];
+                o = LR_offset>>2; L = h[o] ^ h[j]; R = h[o|1];
                 while (j<jend) {
                     R^=(h[L>>>24]+h[s1|(L>>>16&0xff)]^h[s2|(L>>>8&0xff)])+h[s3|(L&0xff)]^h[++j];
                     L^=(h[R>>>24]+h[s1|(R>>>16&0xff)]^h[s2|(R>>>8&0xff)])+h[s3|(R&0xff)]^h[++j];
                 }
                 h[o] = R ^ h[P_last_offset>>2];
-                h[o+1] = L;
+                h[o|1] = L;
                 heap32[i] = h[o];
-                heap32[i + 1] = L;
+                heap32[i|1] = L;
             }
         }
 
