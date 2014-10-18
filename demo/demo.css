@@ -1,3 +1,13 @@
+.page-header {
+    position: relative;
+}
+
+#version {
+    bottom: 9px;
+    left: 1em;
+    position: absolute;
+}
+
 form {
     margin-top: 3em;
 }
