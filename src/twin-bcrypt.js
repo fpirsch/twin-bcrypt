@@ -6,10 +6,9 @@
         factory(exports, require('crypto'));
     } else {
         // Browser globals
-        factory(root.TwinBcrypt = {}, null);
+        factory(root.TwinBcrypt = {}, window.crypto || window.msCrypto);
     }
 }(this, function (exports, crypto) {
-
     "use strict";
 
     var isFirefox = typeof InstallTrigger !== 'undefined';
@@ -19,11 +18,9 @@
     if (crypto) {
         // Nodejs crypto random number generator
         randomBytes = crypto.randomBytes;
-    }
-    else if(typeof window === 'object') {
+        
         // Cryptographic-quality random number generator for newer browsers.
-        crypto = window.crypto || window.msCrypto;
-        if(crypto && crypto.getRandomValues) {
+        if (crypto.getRandomValues) {
             randomBytes = function(numBytes) {
                 var array = new Uint8Array(numBytes);
                 return crypto.getRandomValues(array);
@@ -36,7 +33,7 @@
         var utf8 = unescape(encodeURIComponent(s)),
             len = utf8.length,
             bytes = new Array(len);
-        for(var i = 0; i < len; i++) {
+        for (var i = 0; i < len; i++) {
             bytes[i] = utf8.charCodeAt(i);
         }
         return bytes;
@@ -45,7 +42,7 @@
     function string2rawBytes(s) {
         var len = s.length,
             bytes = new Array(len);
-        for(var i = 0; i < len; i++) {
+        for (var i = 0; i < len; i++) {
             bytes[i] = s.charCodeAt(i);
         }
         return bytes;
@@ -347,7 +344,7 @@
     }
 
     function heap32Set(dest, source, offset) {
-        for(var i = 0, o = offset >> 2; i < source.length; i++, o++) {
+        for (var i = 0, o = offset >> 2; i < source.length; i++, o++) {
             dest[o] = source[i];
         }
     }
@@ -807,5 +804,4 @@ function encrypt(offset) {
     exports.randomBytes = randomBytes;
     exports.defaultCost = GENSALT_DEFAULT_LOG2_ROUNDS;
     exports.version = "{{ version }}";
-
 }));
