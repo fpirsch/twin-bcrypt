@@ -11,6 +11,9 @@
     "scripts": {
         "test": "mocha test/node-test.js"
     },
+    "bin": {
+        "twin-bcrypt": "./bin/twin-bcrypt.js"
+    },
     "bugs": {
         "url": "https://github.com/fpirsch/twin-bcrypt/issues"
     },
