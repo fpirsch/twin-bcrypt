@@ -93,6 +93,16 @@ be used :
 `TwinBcrypt.encodingMode = TwinBcrypt.ENCODING_RAW;`
 
 
+## Command-line
+With a global installation:
+
+    twin-bcrypt <cost> <password-to-hash>
+
+With a local installation:
+
+    node_modules/.bin/twin-bcrypt <cost> <password-to-hash>
+
+
 ## About prefixes
 Back in the old days when all bcrypt-hashed passwords had the `$2a$` prefix, a bug was discovered in the crypt_blowfish implementation of this algorithm.
 A small fraction of the `$2a$` passwords were buggy, but most of them were just fine. It was then decided to
