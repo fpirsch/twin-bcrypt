@@ -5,8 +5,8 @@
         // CommonJS
         factory(exports, require('crypto'));
     } else {
-        // Browser globals
-        factory(root.TwinBcrypt = {}, window.crypto || window.msCrypto);
+        // Browser/Worker globals
+        factory(root.TwinBcrypt = {}, this.crypto || this.msCrypto);
     }
 }(this, function (exports, crypto) {
     "use strict";
