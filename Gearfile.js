@@ -1,5 +1,6 @@
 var package = gear.Util.readJSON('package.json');
-var licence = '/* Twin-Bcrypt ' + package.version + '\n' +
+var licence = '/* @license\n' +
+ ' * Twin-Bcrypt ' + package.version + '\n' +
  ' * https://github.com/fpirsch/twin-bcrypt\n' +
  ' * Licence: BSD-3-Clause\n */\n';
 
