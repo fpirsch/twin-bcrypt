@@ -1,14 +1,15 @@
 /* jshint node: true, browser: true, nonstandard: true, eqeqeq: true, eqnull: true */
 
-(function (root, factory) {
+(function(factory) {
     if (typeof exports === 'object') {
         // CommonJS
         factory(exports, require('crypto'));
     } else {
         // Browser/Worker globals
-        factory(root.TwinBcrypt = {}, this.crypto || this.msCrypto);
+        /* global self */
+        factory(self.TwinBcrypt = {}, self.crypto || self.msCrypto);
     }
-}(this, function (exports, crypto) {
+}(function (exports, crypto) {
     "use strict";
 
     var isFirefox = typeof InstallTrigger !== 'undefined';
