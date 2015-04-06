@@ -76,32 +76,64 @@ Though you can use your custom salt and there is no need for salts to be persist
 
 
 ## API
-* `genSalt(cost)`
-    * `cost` - [OPTIONAL] - Integer between 4 and 31 inclusive. Default 10. This value is logarithmic, the actual number of iterations used will be 2<sup>cost</sup> : increasing the cost by 1 will double the amount of time taken.
-* `hashSync(data, salt)`
-    * `data` - [REQUIRED] - the data to be encrypted.
-    * `salt` - [OPTIONAL] - the salt to be used in encryption. If specified as a number then a salt will be generated and used.
-* `hash(data, salt, progress, callback)`
-    * `data` - [REQUIRED] - the data to be encrypted.
-    * `salt` - [OPTIONAL] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used.
-    * `progress` - [OPTIONAL] - a callback to be invoked during the hash calculation to signify progress. This callback can return `false` to stop the process.
-        * `p` - Value between 0 (exclusive) and 1 (inclusive), sent as a parameter to the progress callback.
-    * `callback` - [REQUIRED] - a callback to be fired once the data has been encrypted (and if the process has not been stopped).
-        * `result` - Hashed data received as an argument.
-* `compareSync(password, refhash)`
-    * `password` - [REQUIRED] - password to check.
-    * `refhash` - [REQUIRED] - reference hash to check the password against.
-    Returns true if the password matches, false if it doesn't. Throws an error if arguments are invalid.
-* `compare(password, refhash, progress, callback)`
-    * `password` - [REQUIRED] - password to check.
-    * `refhash` - [REQUIRED] - reference hash to check the password against.
-    * `progress` - [OPTIONAL] - a callback to be called during the hash verification to signify progress
-        * `p` - Value between 0 (exclusive) and 1 (inclusive), sent as a parameter to the progress callback. This callback can return `false` to stop the process.
-    * `callback` - [REQUIRED] - a callback to be fired once the data has been compared.
-        * `result` - Boolean received as an argument to the callback, indicating whether the data and encrypted forms match (and if the process has not been stopped).
-* `encodingMode`
-    * `ENCODING_UTF8` (default) - encodes non-ascii characters to utf-8 before hashing.
-    * `ENCODING_RAW` - does not encode non-ascii characters in the password. This allows the use of custom encodings.
+
+#### genSalt(cost)
+Generates a random encryption salt. Returns the salt as a string.
+
+| Parameter | Type          | Default | Description |
+| --------- | ------------- |:-------:| ----------- |
+| cost | integer between 4 and 31 inclusive | 10 | This value is logarithmic, the actual number of iterations is 2<sup>cost</sup> : increasing the cost by 1 doubles the computing time. |
+
+
+#### hashSync(data, salt)
+Returns the hashed data as a string.
+
+| Parameter | Type          | Description |
+| --------- | ------------- | ----------- |
+| data      | string        | the data to be encrypted. |
+| salt      | string or number | The salt to be used in encryption, e.g. `"$2y$10$kjm.1j6Rxocp03XeNjMtsO"`. If specified as a cost number then a salt will be generated. If omitted, a salt is generated with the default cost value. |
+
+
+
+#### hash(data, salt, progress, callback)
+Hash some data asynchronously.
+
+| Parameter | Type           | Description |
+| --------- | -------------- | ----------- |
+| data      | string         | the data to be encrypted. |
+| salt      | string or number | The salt to be used in encryption, e.g. `"$2y$10$kjm.1j6Rxocp03XeNjMtsO"`. If specified as a cost number then a salt will be generated. If omitted, a salt is generated with the default cost value. |
+| progress  | function(p)    | a callback to be invoked with a value between 0 (exclusive) and 1 (inclusive) during the hash calculation to signify progress. This callback can return `false` to stop the process. |
+| callback  | function(hash) | a callback to be fired with the computed hash once the data has been encrypted (and if the process has not been stopped). |
+
+
+#### compareSync(password, refhash)
+Returns true if the password matches, false if it doesn't. Throws an error if arguments are invalid.
+
+| Parameter | Type   | Description                                   |
+| --------- | -------| --------------------------------------------- |
+| password  | string | password to check.                            |
+| refhash   | string | reference hash to check the password against. |
+
+
+
+#### compare(password, refhash, progress, callback)
+Compares asynchronously a password against a hash.
+
+| Parameter | Type   | Description                                   |
+| --------- | -------| --------------------------------------------- |
+| password  | string | password to check.                            |
+| refhash   | string | reference hash to check the password against. |
+| progress  | function(p)    | a callback to be invoked with a value between 0 (exclusive) and 1 (inclusive) during the hash verification to signify progress. This callback can return `false` to stop the process. |
+| callback  | function(result) | a callback to be fired once the data has been compared (and if the process has not been stopped). The argument is a boolean indicating whether the password and encrypted hash match. |
+
+
+
+#### encodingMode
+This property takes one of the two values:
+* `ENCODING_UTF8` (default) - encodes non-ascii characters to utf-8 before hashing.
+* `ENCODING_RAW` - does not encode non-ascii characters in the password. This allows the use of custom encodings.
+
+
 
 
 ## Character encoding
