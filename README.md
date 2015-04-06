@@ -10,10 +10,29 @@ Also used in the real world in this great [.htpasswd file generator](http://aspi
 
 
 ## Basic usage:
+#### Node.js
+```javascript
+var TwinBcrypt = require('twin-bcrypt');
+```
+
+#### Browser
+```html
+<script src="twin-bcrypt.min.js"></script>
+```
+or
+```html
+<script src="setImmediate.js"></script>
+<script src="twin-bcrypt.js"></script>
+```
+`setImmediate` [is a native Node.js function](https://nodejs.org/api/timers.html) that doesn't exist in Chrome and Firefox browsers.
+`twin-bcrypt.min.js` includes a polyfill for it, but the non-minified version will need an explicit link to the polyfill
+(included in the `node_modules` folder) to run properly in browser environments.
+
+
+
 #### Synchronous (blocking)
 ```javascript
 var hash = TwinBcrypt.hashSync("bacon");
-
 TwinBcrypt.compareSync("bacon", hash); // true
 TwinBcrypt.compareSync("veggies", hash); // false
 ```
