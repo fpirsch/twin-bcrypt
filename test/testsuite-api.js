@@ -1,4 +1,4 @@
-/* jshint expr: true */
+/* jshint expr: true, node: true */
 /* global chai, describe, it, expect, TwinBcrypt, setTimeout */
 
 /**
@@ -74,6 +74,8 @@ describe('API test suite', function() {
         describe('Synchronous', function() {
             it('should warn when no password is given', function() {
                 expect(function() { TwinBcrypt.hashSync(); }).to.throw(Error, /password|data|argument/);
+                expect(function() { TwinBcrypt.hashSync(4); }).to.throw(Error, /password|data|argument/);
+                expect(function() { TwinBcrypt.hashSync(4, noop); }).to.throw(Error, /password|data|argument|salt/);
             });
 
             it('should be generated with explicit salt', function() {
@@ -87,6 +89,12 @@ describe('API test suite', function() {
                 expect(function() { TwinBcrypt.hashSync('password', '4'); }).to.throw(Error, /salt/, 'as string');
             });
 
+            it('should accept Array passwords', function() {
+                TwinBcrypt.hashSync([112,97,115,115,119,111,114,100], 4).should.match(COST_4_HASH, 'Array');
+                TwinBcrypt.hashSync(new Uint8Array([112,97,115,115,119,111,114,100]), 4).should.match(COST_4_HASH, 'Uint8Array');
+                TwinBcrypt.hashSync([112+256,97-256,115,115,119,111,114,100], 4).should.match(COST_4_HASH, 'Array with out of bound values');
+            });
+            
             it('should be generated with default salt generation', function() {
                 TwinBcrypt.hashSync('password').should.match(DEFAULT_HASH);
             });
@@ -140,13 +148,34 @@ describe('API test suite', function() {
                 });
             });
             
-            it('should accept (password, number_salt, callback)', function(done) {
+            it('should accept (string_password, number_salt, callback)', function(done) {
                 TwinBcrypt.hash('password', 4, function(result) {
                     result.should.match(COST_4_HASH);
                     done();
                 });
             });
 
+            it('should accept (array_password, number_salt, callback)', function(done) {
+                TwinBcrypt.hash([112,97,115,115,119,111,114,100], 4, function(result) {
+                    result.should.match(COST_4_HASH);
+                    done();
+                });
+            });
+
+            it('should accept (array_password_with_out-of-bounds_values, number_salt, callback)', function(done) {
+                TwinBcrypt.hash([112+256,97-256,115,115,119,111,114,100], 4, function(result) {
+                    result.should.match(COST_4_HASH);
+                    done();
+                });
+            });
+            
+            it('should accept (Uint8Array_password, number_salt, callback)', function(done) {
+                TwinBcrypt.hash(new Uint8Array([112,97,115,115,119,111,114,100]), 4, function(result) {
+                    result.should.match(COST_4_HASH);
+                    done();
+                });
+            });
+            
             it('should accept (password, progress, callback)', function(done) {
                 var spy = Spy();
                 TwinBcrypt.hash('password', spy, function(result) {
@@ -236,8 +265,20 @@ describe('API test suite', function() {
                 }).to.throw(Error, /data|argument/);
             });
 
+            it('should accept Array passwords', function() {
+                // 'password' === [112,97,115,115,119,111,114,100]
+                TwinBcrypt.compareSync([112,97,115,115,119,111,114,100], HASH4).should.equal(true, 'Array');
+                TwinBcrypt.compareSync(new Uint8Array([112,97,115,115,119,111,114,100]), HASH4).should.equal(true, 'Uint8Array');
+                TwinBcrypt.compareSync([112+256,97-256,115,115,119,111,114,100], HASH4).should.equal(true, 'Array with out of bound values');
+            });
+            
             it('should return false when the password is wrong', function() {
                 TwinBcrypt.compareSync('wrong', HASH4).should.be.false;
+            });
+
+            it('should return false when the password as an Array is wrong', function() {
+                // 'wrong' === [119,114,111,110,103]
+                TwinBcrypt.compareSync([119,114,111,110,103], HASH4).should.be.false;
             });
 
             it('should return true when the password is correct', function() {
@@ -261,20 +302,48 @@ describe('API test suite', function() {
                 expect(function() { TwinBcrypt.compare('password', 4, noop, noop); }).to.throw(Error, /argument|salt/);
             });
 
-            it('should accept (password, hash, callback)', function(done) {
+            it('should accept (string_password, hash, callback)', function(done) {
                 TwinBcrypt.compare('password', HASH4, function(result) {
                     result.should.be.true;
                     done();
                 });
             });
 
-            it('should return false but not throw when called with (wrong password, hash, callback)', function(done) {
+            it('should accept (array_password, number_salt, callback)', function(done) {
+                TwinBcrypt.compare([112,97,115,115,119,111,114,100], HASH4, function(result) {
+                    result.should.be.true;
+                    done();
+                });
+            });
+
+            it('should accept (array_password_with_out-of-bounds_values, number_salt, callback)', function(done) {
+                TwinBcrypt.compare([112+256,97-256,115,115,119,111,114,100], HASH4, function(result) {
+                    result.should.be.true;
+                    done();
+                });
+            });
+            
+            it('should accept (Uint8Array_password, number_salt, callback)', function(done) {
+                TwinBcrypt.compare(new Uint8Array([112,97,115,115,119,111,114,100]), HASH4, function(result) {
+                    result.should.be.true;
+                    done();
+                });
+            });
+            
+            it('should return false but not throw when called with (wrong string_password, hash, callback)', function(done) {
                 TwinBcrypt.compare('wrong', HASH4, function(result) {
                     result.should.be.false;
                     done();
                 });
             });
 
+            it('should return false but not throw when called with (wrong array_password, hash, callback)', function(done) {
+                TwinBcrypt.compare([119,114,111,110,103], HASH4, function(result) {
+                    result.should.be.false;
+                    done();
+                });
+            });
+            
             it('should accept (password, hash, progress, callback)', function(done) {
                 var spy = Spy();
                 TwinBcrypt.compare('password', HASH7, spy, function(result) {

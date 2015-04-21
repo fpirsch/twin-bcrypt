@@ -639,18 +639,33 @@ function encrypt(offset) {
     }
 
     /**
-     * password must be a string
-     * salt must be a valid string
-     * progress and callback, if present, must be functions.
+     * @param {string|Array|Uint8Array} password
+     * @param {string} salt - must be a valid string
+     * @param {function} [progress]
+     * @param {function} [callback]
      */
     function hashpw(password, salt, progress, callback) {
         var prefix = salt.substr(0, 1 + 2 + 1 + 2 + 1 + 22),    // 29
             log_rounds = +salt.substr(4, 2),
             real_salt = salt.substr(7, 22);
-        password += '\x00';
 
-        var passwordb = (exports.encodingMode === exports.ENCODING_UTF8) ?
-            string2utf8Bytes(password) : string2rawBytes(password);
+        var passwordb;
+        if (typeof password === 'string') {
+            passwordb = (exports.encodingMode === exports.ENCODING_UTF8) ?
+                        string2utf8Bytes(password) : string2rawBytes(password);
+        }
+        else if (Array.isArray(password)) {
+            passwordb = password.map(function(byte) { return byte & 0xff; });
+        }
+        else if (password instanceof Uint8Array) {
+            passwordb = Array.prototype.slice.call(password);
+        }
+        else {
+            throw new Error('Incorrect arguments');
+        }
+        // Since $2a$ prefix.
+        passwordb.push(0);
+        
         var saltb = decode_base64(real_salt, BCRYPT_SALT_LEN);
 
         var rounds = (log_rounds < 31) ? 1 << log_rounds : 2147483648;
@@ -688,7 +703,7 @@ function encrypt(offset) {
     }
 
     /**
-     * cost - [OPTIONAL] - the cost parameter (default: 10). The number of iterations is 2^cost.
+     * @param {integer} [cost=10] - The cost parameter. The number of iterations is 2^cost.
      */
     function genSalt(cost) {
         if (!randomBytes) {
@@ -708,26 +723,27 @@ function encrypt(offset) {
 
     var SALT_PATTERN = /^\$2[ay]\$(0[4-9]|[12][0-9]|3[01])\$[.\/A-Za-z0-9]{21}[.Oeu]/;
 
+    /**
+     * @param {string|Array|Uint8Array} data - the data to be encrypted.
+     * @param {string|integer} [salt] - the salt to use to hash the password. If specified as a number then a salt will be generated (see examples).
+     * @param {function} [progress] - a callback to be called during the hash calculation to signify progress
+     */
     function hashSync(data, salt, progress) {
-        /*
-            data - [REQUIRED] - the data to be encrypted.
-            salt - [OPTIONAL] - the salt to be used in encryption. If specified as a number then a salt will be generated and used (see examples).
-            progress - [OPTIONAL] - progression callback. Mostly for internal use : synchronous, too.
-        */
-        if (typeof data !== 'string') throw new Error('Incorrect arguments');
         if (!salt || typeof salt === 'number') salt = genSalt(salt);
         else if (typeof salt !== 'string' || !SALT_PATTERN.test(salt)) throw new Error('Invalid salt');
         return hashpw(data, salt, progress);
     }
 
+    /**
+     * @param {string|Array|Uint8Array} data - the data to be encrypted.
+     * @param {string|integer} [salt] - the salt to use to hash the password. If specified as a number then a salt will be generated (see examples).
+     * @param {function} [progress] - a callback to be called during the hash calculation to signify progress
+     * @param {function} callback - a callback to be fired once the data has been encrypted.
+     */
     function hash(data, salt, progress, callback) {
-        /*
-            data - [REQUIRED] - the data to be encrypted.
-            salt - [OPTIONAL] - the salt to be used to hash the password. If specified as a number then a salt will be generated and used (see examples).
-            progress - [OPTIONAL] - a callback to be called during the hash calculation to signify progress
-            callback - [REQUIRED] - a callback to be fired once the data has been encrypted.
-        */
-        if (typeof data !== 'string') throw new Error('Incorrect arguments');
+        if (arguments.length < 2) {
+            throw new Error('Incorrect arguments');
+        }
         if (arguments.length === 2) {
             callback = salt;
             salt = progress = null;
@@ -752,13 +768,13 @@ function encrypt(offset) {
 
     var HASH_PATTERN = /^\$2[ay]\$(0[4-9]|[12][0-9]|3[01])\$[.\/A-Za-z0-9]{21}[.Oeu][.\/A-Za-z0-9]{30}[.CGKOSWaeimquy26]$/;
 
+    /**
+     * @param {string|Array|Uint8Array} password - password to check.
+     * @param {string} refhash - reference hash to check the password against.
+     * @returns {boolean}
+     */
     function compareSync(password, refhash) {
-        /*
-            password - [REQUIRED] - password to check.
-            refhash - [REQUIRED] - reference hash to check the password against.
-        */
-
-        if (typeof password !== 'string' ||  typeof refhash !== 'string' || !HASH_PATTERN.test(refhash)) {
+        if (typeof refhash !== 'string' || !HASH_PATTERN.test(refhash)) {
             throw new Error('Incorrect arguments');
         }
 
@@ -767,14 +783,14 @@ function encrypt(offset) {
         return hashedpw === refhash;
     }
 
+    /**
+     * @param {string|Array|Uint8Array} password - password to check.
+     * @param {string} refhash - reference hash to check the password against.
+     * @param {function} [progress] - a callback to be called during the hash verification to signify progress
+     * @param {function} callback - a callback to be fired once the data has been compared, with a boolean indicating the result.
+     */
     function compare(password, refhash, progress, callback) {
-        /*
-            password - [REQUIRED] - password to check.
-            refhash - [REQUIRED] - reference hash to check the password against.
-            progress - [OPTIONAL] - a callback to be called during the hash verification to signify progress
-            callback - [REQUIRED] - a callback to be fired once the data has been compared.
-        */
-        if (typeof password !== 'string' ||  typeof refhash !== 'string' || !HASH_PATTERN.test(refhash)) {
+        if (typeof refhash !== 'string' || !HASH_PATTERN.test(refhash)) {
             throw new Error('Incorrect arguments');
         }
         if (!callback) {
