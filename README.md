@@ -24,7 +24,7 @@ or
 <script src="setImmediate.js"></script>
 <script src="twin-bcrypt.js"></script>
 ```
-`setImmediate` [is a native Node.js function](https://nodejs.org/api/timers.html) that doesn't exist in Chrome and Firefox browsers.
+`setImmediate` [is a native Node.js function](https://nodejs.org/api/timers.html) that is implemented in IE10+ but not in Chrome and Firefox browsers.
 `twin-bcrypt.min.js` includes a polyfill for it, but the non-minified version will need an explicit link to the polyfill
 (included in the `node_modules` folder) to run properly in browser environments.
 
