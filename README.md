@@ -90,7 +90,7 @@ Returns the hashed data as a string.
 
 | Parameter | Type          | Description |
 | --------- | ------------- | ----------- |
-| data      | string, Array or Uint8Array | the data to be encrypted. If a plain Array is given, its values will be clamped to the interval 0-255 |
+| data      | string, Array or Uint8Array | the data to be encrypted. If a plain Array is given, its values will be clamped to the interval 0-255. Limited to 72 bytes. |
 | salt      | string or number | The salt to be used in encryption, e.g. `"$2y$10$kjm.1j6Rxocp03XeNjMtsO"`. If specified as a cost number then a salt will be generated. If omitted, a salt is generated with the default cost value. |
 
 
@@ -100,7 +100,7 @@ Hash some data asynchronously.
 
 | Parameter | Type           | Description |
 | --------- | -------------- | ----------- |
-| data      | string, Array or Uint8Array | the data to be encrypted. If a plain Array is given, its values will be clamped to the interval 0-255 |
+| data      | string, Array or Uint8Array | the data to be encrypted. If a plain Array is given, its values will be clamped to the interval 0-255. Limited to 72 bytes. |
 | salt      | string or number | The salt to be used in encryption, e.g. `"$2y$10$kjm.1j6Rxocp03XeNjMtsO"`. If specified as a cost number then a salt will be generated. If omitted, a salt is generated with the default cost value. |
 | progress  | function(p)    | a callback to be invoked with a value between 0 (exclusive) and 1 (inclusive) during the hash calculation to signify progress. This callback can return `false` to stop the process. |
 | callback  | function(hash) | a callback to be fired with the computed hash once the data has been encrypted (and if the process has not been stopped). |
@@ -111,7 +111,7 @@ Returns true if the password matches, false if it doesn't. Throws an error if ar
 
 | Parameter | Type   | Description                                   |
 | --------- | -------| --------------------------------------------- |
-| password  | string, Array or Uint8Array | password to check.                            |
+| password  | string, Array or Uint8Array | password to check.  Limited to 72 bytes.                           |
 | refhash   | string | reference hash to check the password against. |
 
 
@@ -121,7 +121,7 @@ Compares asynchronously a password against a hash.
 
 | Parameter | Type   | Description                                   |
 | --------- | -------| --------------------------------------------- |
-| password  | string, Array or Uint8Array | password to check.                            |
+| password  | string, Array or Uint8Array | password to check. Limited to 72 bytes.                           |
 | refhash   | string | reference hash to check the password against. |
 | progress  | function(p)    | a callback to be invoked with a value between 0 (exclusive) and 1 (inclusive) during the hash verification to signify progress. This callback can return `false` to stop the process. |
 | callback  | function(result) | a callback to be fired once the data has been compared (and if the process has not been stopped). The argument is a boolean indicating whether the password and encrypted hash match. |
